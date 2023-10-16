@@ -13,7 +13,11 @@ import java.sql.Timestamp;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
@@ -23,27 +27,26 @@ public class AuthService  {
 
   private final UserRepository userRepository;
   private final JwtProvider jwtProvider;
-
+  private final ModelMapper mapper;
+  private final AuthenticationManager authenticationManager;
   public JwtResponse login(@NonNull JwtRequest authRequest) {
-    Optional<User> optionalUser = userRepository.getByLogin(authRequest.getLogin());
-    //  if (!optionalUser.isPresent())
-//      throw new AuthException();
-//    if(authRequest.getLogin() == null || authRequest.getPassword()==null){
-//      throw new LoginException("123");
-//    }
-    UserDto userDto = UserMapperImpl.toUserDto(optionalUser.get());
-    if (BCrypt.checkpw(authRequest.getPassword(), optionalUser.get().getPassword())) {
-
-      final String accessToken = jwtProvider.generateAccessToken(userDto);
-      final String refreshToken = jwtProvider.generateRefreshToken(userDto);
-      Token token = optionalUser.get().getToken();
+    //провеки
+    authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(
+            authRequest.getLogin(),
+            authRequest.getPassword()
+        )
+    );
+    User user = userRepository.getByLogin(authRequest.getLogin())
+        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    UserDto userDto = mapper.map(user, UserDto.class);
+    String accessToken = jwtProvider.generateAccessToken(userDto);
+    String refreshToken = jwtProvider.generateRefreshToken(userDto);
+    //revokeAllUserTokens(user);
+      Token token = user.getToken();
       token.setRefreshToken(refreshToken);
-      userRepository.save(optionalUser.get());
+      userRepository.save(user);
       return new JwtResponse(userDto.getId() ,accessToken, refreshToken);
-    } else {
-//      throw new AuthException();
-      return  null;
-    }
   }
 
   public JwtResponse getAccessToken(@NonNull String refreshToken){
