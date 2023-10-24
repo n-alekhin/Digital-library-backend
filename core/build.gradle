@@ -17,6 +17,10 @@ configurations {
 	}
 }
 
+configurations.all {
+	exclude group: 'org.slf4j', module: 'slf4j-simple'
+}
+
 java {
 	sourceCompatibility = '1.8'
 	targetCompatibility = '1.8'
@@ -24,7 +28,9 @@ java {
 
 repositories {
 	mavenCentral()
-}
+	maven {
+		url 'https://github.com/psiegman/mvn-repo/raw/master/releases'
+	}}
 
 
 dependencies {
@@ -42,5 +48,5 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
-
+	implementation 'nl.siegmann.epublib:epublib-core:3.1'
 }
