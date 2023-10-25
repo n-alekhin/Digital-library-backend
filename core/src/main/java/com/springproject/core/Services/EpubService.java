@@ -1,5 +1,8 @@
 package com.springproject.core.Services;
 
+import com.springproject.core.Entity.Elastic.ElasticAuthor;
+import com.springproject.core.Entity.Elastic.ElasticBook;
+import com.springproject.core.Entity.Elastic.ElasticChapter;
 import com.springproject.core.dto.EpubDto;
 import nl.siegmann.epublib.domain.Author;
 import nl.siegmann.epublib.domain.Book;
@@ -9,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,39 +23,37 @@ public class EpubService {
         return html == null ? null : html.replaceAll("<[^>]*>", "");
     }
 
-    public EpubDto extractInfoFromEpub(InputStream epubStream) {
-        EpubDto epubInfo = new EpubDto();
+    public ElasticBook extractInfoFromEpub(InputStream epubStream) {
+        ElasticBook elasticBook = new ElasticBook();
 
         try {
             Book book = (new EpubReader()).readEpub(epubStream);
 
-            epubInfo.setTitle(book.getTitle());
+            elasticBook.setTitle(book.getTitle());
+            elasticBook.setPublisher(book.getMetadata().getPublishers().get(0));
 
-            List<String> authors = book.getMetadata().getAuthors().stream()
+            List<ElasticAuthor> authors = book.getMetadata().getAuthors().stream()
                     .map(Author::toString)
+                    .map(ElasticAuthor::new)
                     .collect(Collectors.toList());
-            epubInfo.setAuthors(authors);
+            elasticBook.setAuthors(authors);
 
-            List<String> chapterContents = book.getSpine().getSpineReferences().stream()
+            List<ElasticChapter> chapters = book.getSpine().getSpineReferences().stream()
                     .map(ref -> {
                         Resource res = ref.getResource();
                         try {
-                            return new String(res.getData(), "UTF-8");
+                            return new ElasticChapter(res.getTitle(),
+                                    removeHtmlTags(new String(res.getData(), StandardCharsets.UTF_8)));
                         } catch (IOException e) {
                             throw new RuntimeException("Ошибка при чтении ресурса", e);
                         }
-                    })
-                    .collect(Collectors.toList());
-            List<String> chapterContentsRemove = new ArrayList<>();
-            for (String chapter : chapterContents) {
-                chapterContentsRemove.add(removeHtmlTags(chapter));
-            }
-            epubInfo.setChapterContents(chapterContentsRemove);
+                    }).collect(Collectors.toList());
+            elasticBook.setChapters(chapters);
 
         } catch (Exception e) {
             throw new RuntimeException("Ошибка при чтении EPUB", e);
         }
 
-        return epubInfo;
+        return elasticBook;
     }
 }

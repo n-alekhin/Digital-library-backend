@@ -1,22 +1,26 @@
 package com.springproject.core.Entity.Elastic;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
-@Document(indexName = "elasticbooks")
+import javax.persistence.Id;
+import java.util.List;
+
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Document(indexName = "book")
 public class ElasticBook {
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private Long id;
-  private String name;
+    @Id
+    private Long id;
+    @Field(type = FieldType.Text)
+    private String title;
+    @Field(type = FieldType.Text)
+    private String publisher;
+    @Field(type = FieldType.Nested)
+    private List<ElasticAuthor> authors;
+    @Field(type = FieldType.Nested)
+    private List<ElasticChapter> chapters;
 }

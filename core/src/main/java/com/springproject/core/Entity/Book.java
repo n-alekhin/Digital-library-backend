@@ -4,22 +4,20 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.elasticsearch.annotations.Document;
 
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-@Document(indexName = "elasticbooks")
+@Entity
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public class ElasticBook {
+@AllArgsConstructor
+public class Book {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     private Long id;
-
-    private String name;
-
+    private String title;
+    private String fileName;
 }
