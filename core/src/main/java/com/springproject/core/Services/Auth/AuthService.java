@@ -8,19 +8,20 @@ import com.springproject.core.dto.UserDto;
 import com.springproject.core.dto.domain.JwtAuthentication;
 import com.springproject.core.dto.domain.JwtRequest;
 import com.springproject.core.dto.domain.JwtResponse;
+import com.springproject.core.dto.domain.Role;
 import io.jsonwebtoken.Claims;
-import java.sql.Timestamp;
-import java.util.Optional;
+import java.util.*;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService  {
@@ -40,6 +41,7 @@ public class AuthService  {
     User user = userRepository.getByLogin(authRequest.getLogin())
         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     UserDto userDto = mapper.map(user, UserDto.class);
+    userDto.setRoles(new HashSet<>(Collections.singletonList(Role.valueOf(user.getRole()))));
     String accessToken = jwtProvider.generateAccessToken(userDto);
     String refreshToken = jwtProvider.generateRefreshToken(userDto);
     //revokeAllUserTokens(user);

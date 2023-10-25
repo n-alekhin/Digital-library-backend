@@ -41,13 +41,12 @@ public class JwtProvider {
     final Instant accessExpirationInstant = now.plusMinutes(30).atZone(ZoneId.systemDefault()).toInstant();
     final Date accessExpiration = Date.from(accessExpirationInstant);
     return Jwts.builder()
-        .setSubject(userDto.getLogin())
-        .setExpiration(accessExpiration)
-        .signWith(jwtAccessSecret)
-        .claim("id",  userDto.getId())
-        .claim("roles", userDto.getRoles())
-       // .claim("Username", userDto.getUsername())
-        .compact();
+            .claim("id",  userDto.getId())
+            .claim("roles", userDto.getRoles())
+            .setSubject(userDto.getLogin())
+            .setExpiration(accessExpiration)
+            .signWith(jwtAccessSecret)
+            .compact();
   }
 
   public String generateRefreshToken(@NonNull UserDto userDto) {

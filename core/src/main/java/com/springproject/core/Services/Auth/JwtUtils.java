@@ -9,7 +9,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class JwtUtils {
 
@@ -22,9 +24,7 @@ public final class JwtUtils {
     return jwtInfoToken;
   }
   private static Set<Role> getRoles(Claims claims) {
-    final List<String> roles = claims.get("roles", List.class);
-    return roles.stream()
-        .map(Role::valueOf)
-        .collect(Collectors.toSet());
+    List<String> roles = (List<String>) claims.get("roles");
+    return roles.stream().map(Role::valueOf).collect(Collectors.toSet());
   }
 }
