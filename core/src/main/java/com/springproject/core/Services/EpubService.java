@@ -1,9 +1,7 @@
 package com.springproject.core.Services;
 
-import com.springproject.core.Entity.Elastic.ElasticAuthor;
 import com.springproject.core.Entity.Elastic.ElasticBook;
 import com.springproject.core.Entity.Elastic.ElasticChapter;
-import com.springproject.core.dto.EpubDto;
 import nl.siegmann.epublib.domain.Author;
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.Resource;
@@ -32,9 +30,9 @@ public class EpubService {
             elasticBook.setTitle(book.getTitle());
             elasticBook.setPublisher(book.getMetadata().getPublishers().get(0));
 
-            List<ElasticAuthor> authors = book.getMetadata().getAuthors().stream()
+            List<String> authors = book.getMetadata().getAuthors().stream()
                     .map(Author::toString)
-                    .map(ElasticAuthor::new)
+                    //.map(ElasticAuthor::new)
                     .collect(Collectors.toList());
             elasticBook.setAuthors(authors);
 
