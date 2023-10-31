@@ -28,7 +28,7 @@ public class EpubService {
             Book book = (new EpubReader()).readEpub(epubStream);
 
             elasticBook.setTitle(book.getTitle());
-            elasticBook.setPublisher(book.getMetadata().getPublishers().get(0));
+            elasticBook.setPublisher(book.getMetadata().getPublishers().stream().findFirst().orElse(""));
 
             List<String> authors = book.getMetadata().getAuthors().stream()
                     .map(Author::toString)

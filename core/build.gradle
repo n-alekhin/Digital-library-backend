@@ -31,7 +31,9 @@ repositories {
 		url 'https://github.com/psiegman/mvn-repo/raw/master/releases'
 	}}
 
-
+test {
+	useJUnitPlatform()
+}
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'

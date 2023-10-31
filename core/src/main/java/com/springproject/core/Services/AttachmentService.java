@@ -7,13 +7,12 @@ import com.springproject.core.Repository.BookRepository;
 import com.springproject.core.Repository.ElasticBookRepository;
 import com.springproject.core.dto.Attachment;
 import lombok.RequiredArgsConstructor;
+import nl.siegmann.epublib.util.IOUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Objects;
@@ -69,6 +68,29 @@ public class AttachmentService {
             throw new Exception("Could not save File: " + fileName);
         }
         return fileName;
+    }
+    public void saveBookForTesting(String fileName, InputStream fileInputStream, InputStream fileInputStreamForEpub) throws IOException {
+
+        String root = System.getProperty("user.dir") + "\\";
+        String path = root + Constants.storagePath + fileName;
+        File file = new File(path);
+        try (FileOutputStream outputStream = new FileOutputStream(file)) {
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        ElasticBook book = epubService.extractInfoFromEpub(fileInputStreamForEpub);
+        Book bookDB = saveInDB(fileName, book.getTitle());
+        book.setId(bookDB.getId());
+        double[] vector = new double[384];
+        for (int i = 0; i < 384; i++)
+            vector[i] = 1;
+        book.setMyVector(vector);
+        elasticBookRepository.save(book);
     }
 
 
