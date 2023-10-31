@@ -17,13 +17,12 @@ public class ElasticBook {
     private String title;
     @Field(type = FieldType.Text)
     private String publisher;
-    /*@Field(type = FieldType.Nested)
-    private List<ElasticAuthor> authors;
-    @Field(type = FieldType.Nested)
-    private List<ElasticChapter> chapters;*/
     @MultiField(mainField = @Field(type = FieldType.Text),
             otherFields = { @InnerField(suffix = "keyword", type = FieldType.Keyword) })
     private List<String> authors;
     @Field(type = FieldType.Object)
     private List<ElasticChapter> chapters;
+    @Field(name = "my_vector", dims = 384, index = true, type = FieldType.Dense_Vector)
+    private double[] myVector;
+
 }
