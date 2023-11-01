@@ -10,11 +10,14 @@ group = 'com.SpringProject'
 version = '0.0.1-SNAPSHOT'
 
 
-
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
+}
+
+configurations.all {
+	exclude group: 'org.slf4j', module: 'slf4j-simple'
 }
 
 java {
@@ -24,9 +27,13 @@ java {
 
 repositories {
 	mavenCentral()
+	maven {
+		url 'https://github.com/psiegman/mvn-repo/raw/master/releases'
+	}}
+
+test {
+	useJUnitPlatform()
 }
-
-
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -43,5 +50,5 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
-
+	implementation 'nl.siegmann.epublib:epublib-core:3.1'
 }

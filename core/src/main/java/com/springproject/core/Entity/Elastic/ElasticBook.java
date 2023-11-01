@@ -1,22 +1,28 @@
 package com.springproject.core.Entity.Elastic;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.*;
 
-@Document(indexName = "elasticbooks")
+import javax.persistence.Id;
+import java.util.List;
+
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Document(indexName = "book")
 public class ElasticBook {
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private Long id;
-  private String name;
+    @Id
+    private Long id;
+    @Field(type = FieldType.Text)
+    private String title;
+    @Field(type = FieldType.Text)
+    private String publisher;
+    @MultiField(mainField = @Field(type = FieldType.Text),
+            otherFields = { @InnerField(suffix = "keyword", type = FieldType.Keyword) })
+    private List<String> authors;
+    @Field(type = FieldType.Object)
+    private List<ElasticChapter> chapters;
+    @Field(name = "my_vector", dims = 384, index = true, type = FieldType.Dense_Vector)
+    private double[] myVector;
+
 }
