@@ -1,4 +1,4 @@
-package com.springproject.core.Entity.Elastic;
+package com.springproject.core.model.Elastic;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package com.springproject.core.Entity.Elastic;
+package com.springproject.core.model.Elastic;
 
 import lombok.Builder;
 import lombok.Getter;

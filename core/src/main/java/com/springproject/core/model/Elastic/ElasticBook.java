@@ -1,6 +1,7 @@
-package com.springproject.core.Entity.Elastic;
+package com.springproject.core.model.Elastic;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.elasticsearch.annotations.*;
 
@@ -9,6 +10,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @Document(indexName = "book")
 public class ElasticBook {
     @Id

@@ -1,7 +1,7 @@
 package com.springproject.core.Services;
 
-import com.springproject.core.Entity.Elastic.ElasticBook;
-import com.springproject.core.Entity.Elastic.ElasticChapter;
+import com.springproject.core.model.Elastic.ElasticChapter;
+import com.springproject.core.model.ExtractBookInfo;
 import nl.siegmann.epublib.domain.Author;
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.Resource;
@@ -21,20 +21,19 @@ public class EpubService {
         return html == null ? null : html.replaceAll("<[^>]*>", "");
     }
 
-    public ElasticBook extractInfoFromEpub(InputStream epubStream) {
-        ElasticBook elasticBook = new ElasticBook();
+    public ExtractBookInfo extractInfoFromEpub(InputStream epubStream) {
+        ExtractBookInfo fullBookInfo = new ExtractBookInfo();
 
         try {
             Book book = (new EpubReader()).readEpub(epubStream);
-
-            elasticBook.setTitle(book.getTitle());
-            elasticBook.setPublisher(book.getMetadata().getPublishers().stream().findFirst().orElse(""));
+            book.getCoverPage();
+            fullBookInfo.setTitle(book.getTitle());
+            fullBookInfo.setPublisher(book.getMetadata().getPublishers().stream().findFirst().orElse(""));
 
             List<String> authors = book.getMetadata().getAuthors().stream()
                     .map(Author::toString)
-                    //.map(ElasticAuthor::new)
                     .collect(Collectors.toList());
-            elasticBook.setAuthors(authors);
+            fullBookInfo.setAuthors(authors.stream().reduce((acc, s) -> acc.concat(", " + s)).orElse(null));
 
             List<ElasticChapter> chapters = book.getSpine().getSpineReferences().stream()
                     .map(ref -> {
@@ -46,12 +45,18 @@ public class EpubService {
                             throw new RuntimeException("Ошибка при чтении ресурса", e);
                         }
                     }).collect(Collectors.toList());
-            elasticBook.setChapters(chapters);
+            fullBookInfo.setChapters(chapters);
+            fullBookInfo.setGenres(book.getMetadata().getDescriptions().stream().reduce((acc, s) -> acc.concat(", " + s)).orElse(null));
+            fullBookInfo.setLanguage(book.getMetadata().getLanguage());
+            fullBookInfo.setDescription(book.getMetadata().getDescriptions().stream().reduce((acc, s) -> acc.concat(", " + s)).orElse(null));
+            fullBookInfo.setCoverImage(book.getCoverImage().getData());
 
+            fullBookInfo.setMediaType(book.getCoverImage().getMediaType().toString());
         } catch (Exception e) {
             throw new RuntimeException("Ошибка при чтении EPUB", e);
         }
 
-        return elasticBook;
+        return fullBookInfo;
     }
+
 }

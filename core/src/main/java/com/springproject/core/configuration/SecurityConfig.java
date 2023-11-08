@@ -2,6 +2,7 @@ package com.springproject.core.configuration;
 
 import com.springproject.core.Filter.JwtFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,11 +20,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+  @Value("${application.security.allowed-origin}")
+  private String allowedOrigin;
   private final UserDetailsService userDetailsService;
   private final JwtFilter jwtFilter;
   @Bean
@@ -33,12 +39,27 @@ public class SecurityConfig {
             .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .antMatchers(HttpMethod.POST, "/user/reg").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-            .anyRequest().authenticated());
+                //.anyRequest().authenticated());
+                .anyRequest().permitAll());
     http.sessionManagement(session ->
         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
     http.authenticationProvider(authenticationProvider());
     http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+    http.cors();
     return http.build();
+  }
+  @Bean
+  public WebMvcConfigurer cors() {
+    return new WebMvcConfigurer() {
+      @Override
+      public void addCorsMappings(CorsRegistry registry) {
+        registry
+                .addMapping("/**")
+                .allowedOrigins(allowedOrigin)
+                .allowedMethods(CorsConfiguration.ALL)
+                .allowCredentials(true);
+      }
+    };
   }
 
 

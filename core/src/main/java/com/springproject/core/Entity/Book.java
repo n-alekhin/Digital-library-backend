@@ -18,6 +18,7 @@ public class Book {
     @Id
     @GeneratedValue
     private Long id;
-    private String title;
     private String fileName;
+    private String title;
+    private String authors;
 }
