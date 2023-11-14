@@ -11,7 +11,7 @@ import java.util.List;
 public class ExtractBookInfo {
     private String mediaType;
     private String title;
-    private String authors;
+    private List<String> authors;
     private String language;
     private String genres;
     private String description;

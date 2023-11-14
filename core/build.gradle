@@ -51,4 +51,5 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 	implementation 'nl.siegmann.epublib:epublib-core:3.1'
+	implementation 'org.jsoup:jsoup:1.15.4'
 }

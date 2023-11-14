@@ -23,4 +23,8 @@ public class CoverImage implements Serializable {
 
     @Lob
     private byte[] coverImage;
+
+    public CoverImage(Book book) {
+        this.book = book;
+    }
 }

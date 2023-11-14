@@ -12,5 +12,5 @@ import lombok.Setter;
 @Setter
 public class ElasticMathQuery {
     private String query;
-    private Operator operator;
+    private Operator operator = Operator.Or;
 }

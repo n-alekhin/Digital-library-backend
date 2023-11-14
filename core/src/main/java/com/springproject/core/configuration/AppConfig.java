@@ -1,5 +1,7 @@
 package com.springproject.core.configuration;
 
+import com.springproject.core.Mapper.CoverImageMapper;
+import com.springproject.core.Mapper.FullBookMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +15,10 @@ public class AppConfig {
 
   @Bean
   public ModelMapper modelMapper() {
-    return new ModelMapper();
+    ModelMapper mapper = new ModelMapper();
+    mapper.addConverter(new FullBookMapper());
+    mapper.addConverter(new CoverImageMapper());
+    return mapper;
   }
   @Bean
   public MultipartConfigElement multipartConfigElement() {

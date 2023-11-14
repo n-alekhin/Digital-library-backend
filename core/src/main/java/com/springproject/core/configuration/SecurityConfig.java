@@ -10,6 +10,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -45,7 +46,7 @@ public class SecurityConfig {
         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
     http.authenticationProvider(authenticationProvider());
     http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-    http.cors();
+    http.cors(Customizer.withDefaults());
     return http.build();
   }
   @Bean
