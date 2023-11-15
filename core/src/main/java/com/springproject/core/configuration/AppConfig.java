@@ -7,9 +7,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.unit.DataSize;
 
 import javax.servlet.MultipartConfigElement;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class AppConfig {
+  @Bean
+  public RestTemplate restTemplate() {
+    return new RestTemplate();
+  }
 
   @Bean
   public ModelMapper modelMapper() {

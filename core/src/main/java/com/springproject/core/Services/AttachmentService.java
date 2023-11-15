@@ -24,7 +24,7 @@ public class AttachmentService {
     private final BookRepository bookRepository;
     private final ElasticBookRepository elasticBookRepository;
     private final EpubService epubService;
-
+    private final VectorService vectorService;
 
     public void saveBookEpub(MultipartFile bookEpub) throws Exception {
         if (!Constants.type.equals(bookEpub.getContentType())) {
@@ -35,9 +35,8 @@ public class AttachmentService {
             ElasticBook book = epubService.extractInfoFromEpub(inputBook);
             Book bookDB = saveInDB(fileName, book.getTitle());
             book.setId(bookDB.getId());
-            double[] vector = new double[384];
-            for (int i = 0; i < 384; i++)
-                vector[i] = 1;
+            double[] vector = vectorService.getVector(book.getChapters().get(2).getContent())
+                .stream().mapToDouble(Double::doubleValue).toArray();
             book.setMyVector(vector);
             elasticBookRepository.save(book);
         } catch (IOException e) {
