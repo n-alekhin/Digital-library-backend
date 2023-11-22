@@ -13,4 +13,5 @@ import lombok.Setter;
 public class ElasticMathQuery {
     private String query;
     private Operator operator = Operator.Or;
+    private String fuzzy = null;
 }

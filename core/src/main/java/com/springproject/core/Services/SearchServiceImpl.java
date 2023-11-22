@@ -33,6 +33,7 @@ public class SearchServiceImpl implements SearchService {
                                     .of(innerQ -> innerQ.match(m -> m.field(key)
                                             .query(query.getMust().get(key).getQuery())
                                             .operator(query.getMust().get(key).getOperator())
+                                            .fuzziness(query.getMust().get(key).getFuzzy())
                                     ))
                     ).collect(Collectors.toList())
             );
