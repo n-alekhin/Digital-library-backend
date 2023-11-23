@@ -35,8 +35,9 @@ public class EpubService {
                     .map(ref -> {
                         Resource res = ref.getResource();
                         try {
-                            return new ElasticChapter(res.getTitle(),
-                                    Jsoup.parse(new String(res.getData(), StandardCharsets.UTF_8)).text());
+                            ElasticChapter chapter = new ElasticChapter();
+                            chapter.setContent(Jsoup.parse(new String(res.getData(), StandardCharsets.UTF_8)).text());
+                            return chapter;
                         } catch (IOException e) {
                             throw new RuntimeException("Ошибка при чтении ресурса", e);
                         }

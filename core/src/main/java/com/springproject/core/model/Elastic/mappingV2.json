@@ -1,11 +1,6 @@
 {
   "mappings": {
     "properties": {
-      "_class": {
-        "type": "keyword",
-        "index": false,
-        "doc_values": false
-      },
       "id": {
         "type": "long"
       },
@@ -26,9 +21,7 @@
           },
           "vector": {
             "type": "dense_vector",
-            "dims": 384,
-            "index": true,
-            "similarity": "cosine"
+            "dims": 384
           }
         }
       }

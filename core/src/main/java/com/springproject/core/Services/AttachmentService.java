@@ -49,9 +49,11 @@ public class AttachmentService {
             book.setId(bookId);
 
             double[] vector = new double[384];
-            for (int i = 0; i < 384; i++)
+            for (int i = 0; i < 150; i++)
+                vector[i] = 0.1;
+            for (int i = 150; i < 384; i++)
                 vector[i] = 1;
-            book.setMyVector(vector);
+            book.getChapters().forEach(chapter -> chapter.setVector(vector));
 
             elasticBookRepository.save(book);
         } catch (IOException e) {
@@ -117,7 +119,7 @@ public class AttachmentService {
         double[] vector = new double[384];
         for (int i = 0; i < 384; i++)
             vector[i] = 1;
-        book.setMyVector(vector);
+        book.getChapters().forEach(chapter -> chapter.setVector(vector));
         elasticBookRepository.save(book);
     }
 
