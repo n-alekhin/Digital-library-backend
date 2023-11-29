@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -34,6 +35,7 @@ public class AttachmentService {
     private final CoverImageRepository coverImageRepository;
     private final EpubService epubService;
     private final ModelMapper modelMapper;
+    private final VectorService vectorService;
 
     public void saveBookEpub(MultipartFile bookEpub, String uniqueString) {
         if (!constants.type.equals(bookEpub.getContentType())) {
@@ -47,13 +49,10 @@ public class AttachmentService {
 
             ElasticBook book = modelMapper.map(fullBook, ElasticBook.class);
             book.setId(bookId);
-
-            double[] vector = new double[384];
-            for (int i = 0; i < 150; i++)
-                vector[i] = 0.1;
-            for (int i = 150; i < 384; i++)
-                vector[i] = 1;
-            book.getChapters().forEach(chapter -> chapter.setVector(vector));
+            book.getChapters().forEach(chapter -> {
+                double[] vector = listToArray(vectorService.getVector(chapter.getContent()));
+                chapter.setVector(vector);
+            });
 
             elasticBookRepository.save(book);
         } catch (IOException e) {
@@ -139,5 +138,13 @@ public class AttachmentService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static double[] listToArray(List<Double> doubleList) {
+        double[] doubleArray = new double[doubleList.size()];
+        for (int i = 0; i < doubleList.size(); i++) {
+            doubleArray[i] = doubleList.get(i);
+        }
+        return doubleArray;
     }
 }
