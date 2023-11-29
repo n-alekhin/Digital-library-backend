@@ -1,9 +1,14 @@
 package com.springproject.core.Controllers;
 
+import com.springproject.core.Services.SearchService;
+import com.springproject.core.dto.BookDTO;
+import com.springproject.core.dto.KnnAndBoolSearch;
 import com.springproject.core.model.Elastic.ElasticBook;
 import com.springproject.core.Services.AttachmentService;
 import com.springproject.core.Services.Auth.AuthService;
 import com.springproject.core.dto.domain.JwtAuthentication;
+import com.springproject.core.model.Elastic.search.KnnSearch;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.http.ResponseEntity;
@@ -15,15 +20,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
+@Hidden
 public class UtilityController {
 
   private final AuthService authService;
   private final AttachmentService attachmentService;
   private final ElasticsearchOperations operations;
+  private final SearchService searchService;
 
   @PreAuthorize("hasAuthority('USER')")
   @GetMapping("/hello")
@@ -41,6 +49,14 @@ public class UtilityController {
   @PostMapping("/delete-index")
   public Boolean deleteIndex() {
     return operations.indexOps(ElasticBook.class).delete();
+  }
+  @GetMapping("/knn")
+  public List<BookDTO> knnSearch(@RequestBody KnnSearch knnSearch) {
+    return searchService.searchBookKnn(knnSearch);
+  }
+  @GetMapping("/knn-and-bool")
+  public List<BookDTO> knnSearch(@RequestBody KnnAndBoolSearch query) {
+    return searchService.searchBookKnnAndBool(query.getKnn(), query.getBool());
   }
 
   @PostMapping("/loadAllBooks")

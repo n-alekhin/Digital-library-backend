@@ -1,5 +1,6 @@
-package com.springproject.core.model.Elastic;
+package com.springproject.core.model.Elastic.search;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.util.Map;
@@ -10,6 +11,8 @@ import java.util.Map;
 @AllArgsConstructor
 public class BoolSearch {
     private Map<String, ElasticMathQuery> must;
+    @Schema(hidden = true)
     private Map<String, String> should;
+    @Schema(hidden = true)
     private Map<String, String> filter;
 }

@@ -38,8 +38,8 @@ public class SecurityConfig {
     http.csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                .antMatchers(HttpMethod.POST, "/user/reg").permitAll()
-                .antMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/user/reg").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                 //.anyRequest().authenticated());
                 .anyRequest().permitAll());
     http.sessionManagement(session ->

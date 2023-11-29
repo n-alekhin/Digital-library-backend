@@ -10,10 +10,14 @@ import com.springproject.core.dto.DetailedBookDTO;
 import com.springproject.core.exceptions.BookNotFoundException;
 import com.springproject.core.exceptions.SaveFileException;
 import com.springproject.core.model.Constants;
-import com.springproject.core.model.Elastic.BoolSearch;
+import com.springproject.core.model.Elastic.search.BoolSearch;
 import com.springproject.core.Services.AttachmentService;
 import com.springproject.core.Services.SearchService;
 import com.springproject.core.dto.Attachment;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -42,7 +46,8 @@ public class BookController {
     private final AuthService authService;
 
 
-
+    @Operation(description = "В качестве \"additionalProp\" для запроса к содержанию книги указать \"chapters.content\"," +
+            " для заголовка книги - \"title\", для авторов - \"authors\". Поля \"operator\" и \"fuzzy\" опциональные")
     @GetMapping("/search/advanced")
     public List<BookDTO> searchBookAdvanced(@RequestBody BoolSearch boolSearch) {
         return searchService.searchBookBool(boolSearch);
@@ -57,6 +62,11 @@ public class BookController {
         return book;
     }
     @Transactional
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Возвращает изображение обложки", content =
+                    { @Content(mediaType = "image/jpeg")}),
+            @ApiResponse(responseCode = "400", description = "В пути некорректный id"),
+    })
     @GetMapping("/cover/{bookId}")
     public ResponseEntity<Resource> getImageBook(@PathVariable String bookId) {
         CoverImage image = coverImageRepository.getReferenceById(Long.parseLong(bookId));
@@ -68,13 +78,23 @@ public class BookController {
                                 + "\"")
                 .body(new ByteArrayResource(image.getCoverImage()));
     }
-    @PostMapping("/load")
+    @Operation(description = "В качестве тела form-data отправить файл")
+    @PostMapping(value = "/load", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public void loadBook(@RequestParam("book") MultipartFile bookEpub) throws SaveFileException {
         if (bookEpub.isEmpty()) {
             throw new SaveFileException("File not found");
         }
-        attachmentService.saveBookEpub(bookEpub, authService.getAuthInfo().getId().toString());
+        String id = "0";
+        try {
+            id = authService.getAuthInfo().getId().toString();
+        } catch (ClassCastException ignore) {}
+        attachmentService.saveBookEpub(bookEpub, id);
     }
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Возвращает книгу в epub", content =
+                    { @Content(mediaType = "application/epub+zip")}),
+            @ApiResponse(responseCode = "400", description = "В пути некорректный id"),
+    })
     @GetMapping("/download/{bookId}")
     public ResponseEntity<Resource> downloadFile(@PathVariable Long bookId) throws Exception {
         Attachment attachment = attachmentService.getAttachment(bookId);

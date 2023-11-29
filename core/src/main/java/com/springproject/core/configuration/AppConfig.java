@@ -2,13 +2,13 @@ package com.springproject.core.configuration;
 
 import com.springproject.core.Mapper.CoverImageMapper;
 import com.springproject.core.Mapper.FullBookMapper;
+import jakarta.servlet.MultipartConfigElement;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.unit.DataSize;
 
-import javax.servlet.MultipartConfigElement;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
