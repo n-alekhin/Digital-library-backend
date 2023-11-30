@@ -40,8 +40,7 @@ public class SecurityConfig {
             .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .requestMatchers(HttpMethod.POST, "/user/reg").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-                //.anyRequest().authenticated());
-                .anyRequest().permitAll());
+            .anyRequest().permitAll());
     http.sessionManagement(session ->
         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
     http.authenticationProvider(authenticationProvider());

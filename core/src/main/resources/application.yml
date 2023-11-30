@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost/library
-    username: username
-    password: password
+    username: postgres
+    password: qwerty
 
   jpa:
     generate-ddl: true
@@ -11,6 +11,8 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
+server:
+  port: 20000
 jwt:
   secret:
     access: qBTmv4oXFFR2GwjexDJ4t6fsIUIUhhXqlktXjXdkcyygs8nPVEwMfo29VDRRepYDVV5IkIxBMzr7OEHXEHd37w==

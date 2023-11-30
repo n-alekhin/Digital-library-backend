@@ -7,6 +7,7 @@ import com.springproject.core.model.Elastic.ElasticBook;
 import com.springproject.core.Services.AttachmentService;
 import com.springproject.core.Services.Auth.AuthService;
 import com.springproject.core.dto.domain.JwtAuthentication;
+import com.springproject.core.model.Elastic.search.Knn;
 import com.springproject.core.model.Elastic.search.KnnSearch;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
@@ -51,8 +52,8 @@ public class UtilityController {
     return operations.indexOps(ElasticBook.class).delete();
   }
   @GetMapping("/knn")
-  public List<BookDTO> knnSearch(@RequestBody KnnSearch knnSearch) {
-    return searchService.searchBookKnn(knnSearch);
+  public List<BookDTO> knnSearch(@RequestBody Knn knn) {
+    return searchService.searchBookKnn(knn);
   }
   @GetMapping("/knn-and-bool")
   public List<BookDTO> knnSearch(@RequestBody KnnAndBoolSearch query) {

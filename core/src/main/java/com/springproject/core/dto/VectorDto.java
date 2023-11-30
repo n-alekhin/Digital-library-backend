@@ -7,5 +7,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class VectorDto {
-  private List<Double> result;
+  private List<Float> result;
 }

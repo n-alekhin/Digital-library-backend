@@ -14,6 +14,7 @@ import com.springproject.core.model.Elastic.search.BoolSearch;
 import com.springproject.core.Services.AttachmentService;
 import com.springproject.core.Services.SearchService;
 import com.springproject.core.dto.Attachment;
+import com.springproject.core.model.Elastic.search.Knn;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -51,6 +52,10 @@ public class BookController {
     @GetMapping("/search/advanced")
     public List<BookDTO> searchBookAdvanced(@RequestBody BoolSearch boolSearch) {
         return searchService.searchBookBool(boolSearch);
+    }
+    @GetMapping("/search/semantic")
+    public List<BookDTO> knnSearch(@RequestBody Knn knn) {
+        return searchService.searchBookKnn(knn);
     }
     @GetMapping("/{bookId}")
     public DetailedBookDTO getDetailedBook(@PathVariable String bookId) {
