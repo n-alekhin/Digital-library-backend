@@ -17,7 +17,6 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -78,11 +77,7 @@ public class SearchServiceImpl implements SearchService {
         query.setField("chapters.vector");
         query.setK(knn.getK());
         query.setNumCandidates(knn.getNumCandidates());
-        List<Float> floatList = new ArrayList<>();
-        for (Double value : vectorService.getVector(knn.getQuery())) {
-            floatList.add(value.floatValue());
-        }
-        query.setQuery_vector(floatList);
+        query.setQuery_vector(vectorService.getVector(knn.getQuery()));
         Query queryForElastic = new NativeQueryBuilder()
                 .withSearchType(null)
                 .withStoredFields(Collections.singletonList("id"))

@@ -22,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -50,8 +49,7 @@ public class AttachmentService {
             ElasticBook book = modelMapper.map(fullBook, ElasticBook.class);
             book.setId(bookId);
             book.getChapters().forEach(chapter -> {
-                double[] vector = listToArray(vectorService.getVector(chapter.getContent()));
-                chapter.setVector(vector);
+                chapter.setVector(vectorService.getVector(chapter.getContent()));
             });
 
             elasticBookRepository.save(book);
@@ -115,10 +113,9 @@ public class AttachmentService {
         Long bookId = saveInDB(fileName, fullBook);
         ElasticBook book = modelMapper.map(fullBook, ElasticBook.class);
         book.setId(bookId);
-        double[] vector = new double[384];
-        for (int i = 0; i < 384; i++)
-            vector[i] = 1;
-        book.getChapters().forEach(chapter -> chapter.setVector(vector));
+        book.getChapters().forEach(chapter -> {
+            chapter.setVector(vectorService.getVector(chapter.getContent()));
+        });
         elasticBookRepository.save(book);
     }
 
@@ -140,11 +137,4 @@ public class AttachmentService {
         }
     }
 
-    private static double[] listToArray(List<Double> doubleList) {
-        double[] doubleArray = new double[doubleList.size()];
-        for (int i = 0; i < doubleList.size(); i++) {
-            doubleArray[i] = doubleList.get(i);
-        }
-        return doubleArray;
-    }
 }
