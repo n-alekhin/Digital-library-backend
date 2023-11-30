@@ -1,21 +1,32 @@
 package com.springproject.core.Controllers;
 
-import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
-import com.springproject.core.Entity.Constants;
-import com.springproject.core.Entity.Elastic.BoolSearch;
-import com.springproject.core.Entity.Elastic.ElasticBook;
-import com.springproject.core.Entity.Elastic.ElasticMathQuery;
+import com.springproject.core.Entity.BookFullInfo;
+import com.springproject.core.Entity.CoverImage;
+import com.springproject.core.Repository.BookFullInfoRepository;
+import com.springproject.core.Repository.CoverImageRepository;
+import com.springproject.core.Services.Auth.AuthService;
+import com.springproject.core.dto.BookDTO;
+import com.springproject.core.dto.DetailedBookDTO;
+import com.springproject.core.exceptions.BookNotFoundException;
+import com.springproject.core.exceptions.SaveFileException;
+import com.springproject.core.model.Constants;
+import com.springproject.core.model.Elastic.search.BoolSearch;
 import com.springproject.core.Services.AttachmentService;
 import com.springproject.core.Services.SearchService;
 import com.springproject.core.dto.Attachment;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,46 +37,69 @@ import java.util.*;
 @RequestMapping("/book")
 @RequiredArgsConstructor
 public class BookController {
-    private final ElasticsearchOperations operations;
+    private final Constants constants;
     private final AttachmentService attachmentService;
     private final SearchService searchService;
+    private final CoverImageRepository coverImageRepository;
+    private final BookFullInfoRepository bookFullInfoRepository;
+    private final ModelMapper modelMapper;
+    private final AuthService authService;
 
-    @PostMapping("/delete-index")
-    public Boolean deleteIndex() {
-        return operations.indexOps(ElasticBook.class).delete();
-    }
 
-    @GetMapping("/search/authors")
-    public List<ElasticBook> searchBook(@RequestParam String query) {
-        Map<String, ElasticMathQuery> must = new HashMap<>();
-        must.put("authors", new ElasticMathQuery(query, Operator.Or));
-        return searchService.searchBookBool(BoolSearch.builder().must(must).build());
+    @Operation(description = "В качестве \"additionalProp\" для запроса к содержанию книги указать \"chapters.content\"," +
+            " для заголовка книги - \"title\", для авторов - \"authors\". Поля \"operator\" и \"fuzzy\" опциональные")
+    @GetMapping("/search/advanced")
+    public List<BookDTO> searchBookAdvanced(@RequestBody BoolSearch boolSearch) {
+        return searchService.searchBookBool(boolSearch);
     }
-    @GetMapping("/search/chapters")
-    public List<ElasticBook> searchBookByChapters(@RequestParam String query) {
-        Map<String, ElasticMathQuery> must = new HashMap<>();
-        must.put("chapters.content", new ElasticMathQuery(query, Operator.And));
-        return searchService.searchBookBool(BoolSearch.builder().must(must).build());
+    @GetMapping("/{bookId}")
+    public DetailedBookDTO getDetailedBook(@PathVariable String bookId) {
+        BookFullInfo bookFullInfo = bookFullInfoRepository.findById(Long.parseLong(bookId)).orElseThrow(() -> new BookNotFoundException("Book not found"));
+        DetailedBookDTO book = modelMapper.map(bookFullInfo, DetailedBookDTO.class);
+        book.setCoverImageUrl(constants.getImagePath() + bookFullInfo.getBook().getId());
+        book.setTitle(bookFullInfo.getBook().getTitle());
+        book.setAuthors(bookFullInfo.getBook().getAuthors());
+        return book;
     }
-    @GetMapping("/search/title")
-    public List<ElasticBook> searchBookByTitle(@RequestParam String query) {
-        Map<String, ElasticMathQuery> must = new HashMap<>();
-        must.put("title", new ElasticMathQuery(query, Operator.Or));
-        return searchService.searchBookBool(BoolSearch.builder().must(must).build());
+    @Transactional
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Возвращает изображение обложки", content =
+                    { @Content(mediaType = "image/jpeg")}),
+            @ApiResponse(responseCode = "400", description = "В пути некорректный id"),
+    })
+    @GetMapping("/cover/{bookId}")
+    public ResponseEntity<Resource> getImageBook(@PathVariable String bookId) {
+        CoverImage image = coverImageRepository.getReferenceById(Long.parseLong(bookId));
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(image.getMediaType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"cover" +
+                                bookId + "." + image.getMediaType().substring(image.getMediaType().indexOf('/') + 1)
+                                + "\"")
+                .body(new ByteArrayResource(image.getCoverImage()));
     }
-    @PostMapping("/load")
-    public String loadBook(@RequestParam("book") MultipartFile bookEpub) throws Exception {
+    @Operation(description = "В качестве тела form-data отправить файл")
+    @PostMapping(value = "/load", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public void loadBook(@RequestParam("book") MultipartFile bookEpub) throws SaveFileException {
         if (bookEpub.isEmpty()) {
-            return "File not found";
+            throw new SaveFileException("File not found");
         }
-        attachmentService.saveBookEpub(bookEpub);
-        return "Success";
+        String id = "0";
+        try {
+            id = authService.getAuthInfo().getId().toString();
+        } catch (ClassCastException ignore) {}
+        attachmentService.saveBookEpub(bookEpub, id);
     }
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Возвращает книгу в epub", content =
+                    { @Content(mediaType = "application/epub+zip")}),
+            @ApiResponse(responseCode = "400", description = "В пути некорректный id"),
+    })
     @GetMapping("/download/{bookId}")
     public ResponseEntity<Resource> downloadFile(@PathVariable Long bookId) throws Exception {
         Attachment attachment = attachmentService.getAttachment(bookId);
         return  ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(Constants.type))
+                .contentType(MediaType.parseMediaType(constants.type))
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=\"" + attachment.getName()
                                 + "\"")
@@ -73,40 +107,3 @@ public class BookController {
     }
 }
 
-/*@GetMapping("/search/authors")
-    public List<ElasticBook> searchBook(@RequestParam String query) {
-        List<ElasticBook> books = new LinkedList<>();
-        Query query2 = new NativeQueryBuilder()
-                .withQuery(q1 -> q1.nested(n -> n
-                                .path("authors")
-                                .query(q -> q
-                                        .match(m -> m
-                                                .field("authors.author")
-                                                .query(query)
-                                        )
-                                )
-                        )
-                ).build();
-        query2.setFields(Arrays.asList("title", "id"));
-        query2.setStoredFields(Arrays.asList("title", "id"));
-        operations.search(query2, ElasticBook.class).getSearchHits().forEach(h -> books.add(h.getContent()));
-        return books;
-    }*/
-/*@GetMapping("/search/chapters")
-public List<ElasticBook> searchBookByChapters(@RequestParam String query) {
-    List<ElasticBook> books = new LinkedList<>();
-    Query query2 = new NativeQueryBuilder()
-            .withQuery(q1 -> q1.nested(n -> n
-                            .path("chapters")
-                            .query(q -> q
-                                    .match(m -> m
-                                            .field("chapters.content")
-                                            .query(query)
-                                            .operator(Operator.And)
-                                    )
-                            )
-                    )
-            ).build();
-    operations.search(query2, ElasticBook.class).getSearchHits().forEach(h -> books.add(h.getContent()));
-    return books;
-}*/

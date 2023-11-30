@@ -1,4 +1,4 @@
-package com.springproject.core.Entity.Elastic;
+package com.springproject.core.model.Elastic;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,8 +11,8 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ElasticChapter {
-    @Field(type = FieldType.Text)
-    private String title;
+    @Field(name = "vector", dims = 384, index = true, type = FieldType.Dense_Vector)
+    private double[] vector;
 
     @Field(type = FieldType.Text)
     private String content;

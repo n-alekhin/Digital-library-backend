@@ -1,10 +1,13 @@
 package com.springproject.core.Services;
 
-import com.springproject.core.Entity.Elastic.BoolSearch;
-import com.springproject.core.Entity.Elastic.ElasticBook;
+import com.springproject.core.dto.BookDTO;
+import com.springproject.core.model.Elastic.search.BoolSearch;
+import com.springproject.core.model.Elastic.search.KnnSearch;
 
 import java.util.List;
 
 public interface SearchService {
-    List<ElasticBook> searchBookBool(BoolSearch query);
+    List<BookDTO> searchBookBool(BoolSearch query);
+    List<BookDTO> searchBookKnn(KnnSearch query);
+    List<BookDTO> searchBookKnnAndBool(KnnSearch knnQuery, BoolSearch boolQuery);
 }

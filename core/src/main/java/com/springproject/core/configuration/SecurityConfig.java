@@ -2,6 +2,7 @@ package com.springproject.core.configuration;
 
 import com.springproject.core.Filter.JwtFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -19,11 +21,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+  @Value("${application.security.allowed-origin}")
+  private String allowedOrigin;
   private final UserDetailsService userDetailsService;
   private final JwtFilter jwtFilter;
   @Bean
@@ -31,14 +38,29 @@ public class SecurityConfig {
     http.csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                .antMatchers(HttpMethod.POST, "/user/reg").permitAll()
-                .antMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-            .anyRequest().authenticated());
+                .requestMatchers(HttpMethod.POST, "/user/reg").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                //.anyRequest().authenticated());
+                .anyRequest().permitAll());
     http.sessionManagement(session ->
         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
     http.authenticationProvider(authenticationProvider());
     http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+    http.cors(Customizer.withDefaults());
     return http.build();
+  }
+  @Bean
+  public WebMvcConfigurer cors() {
+    return new WebMvcConfigurer() {
+      @Override
+      public void addCorsMappings(CorsRegistry registry) {
+        registry
+                .addMapping("/**")
+                .allowedOrigins(allowedOrigin)
+                .allowedMethods(CorsConfiguration.ALL)
+                .allowCredentials(true);
+      }
+    };
   }
 
 

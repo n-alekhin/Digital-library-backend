@@ -1,0 +1,30 @@
+{
+  "mappings": {
+    "properties": {
+      "id": {
+        "type": "long"
+      },
+      "authors": {
+        "type": "text"
+      },
+      "publisher": {
+        "type": "text"
+      },
+      "title": {
+        "type": "text"
+      },
+      "chapters": {
+        "type": "nested",
+        "properties": {
+          "content": {
+            "type": "text"
+          },
+          "vector": {
+            "type": "dense_vector",
+            "dims": 384
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,19 +1,29 @@
 package com.springproject.core.configuration;
 
+import com.springproject.core.Mapper.CoverImageMapper;
+import com.springproject.core.Mapper.FullBookMapper;
+import jakarta.servlet.MultipartConfigElement;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.unit.DataSize;
 
-import javax.servlet.MultipartConfigElement;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class AppConfig {
+  @Bean
+  public RestTemplate restTemplate() {
+    return new RestTemplate();
+  }
 
   @Bean
   public ModelMapper modelMapper() {
-    return new ModelMapper();
+    ModelMapper mapper = new ModelMapper();
+    mapper.addConverter(new FullBookMapper());
+    mapper.addConverter(new CoverImageMapper());
+    return mapper;
   }
   @Bean
   public MultipartConfigElement multipartConfigElement() {

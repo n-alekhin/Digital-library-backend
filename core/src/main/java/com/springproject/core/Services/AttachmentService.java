@@ -1,13 +1,20 @@
 package com.springproject.core.Services;
 
 import com.springproject.core.Entity.Book;
-import com.springproject.core.Entity.Constants;
-import com.springproject.core.Entity.Elastic.ElasticBook;
+import com.springproject.core.Entity.BookFullInfo;
+import com.springproject.core.Entity.CoverImage;
+import com.springproject.core.Repository.BookFullInfoRepository;
+import com.springproject.core.Repository.CoverImageRepository;
+import com.springproject.core.exceptions.InvalidBookTypeException;
+import com.springproject.core.exceptions.SaveFileException;
+import com.springproject.core.model.Constants;
+import com.springproject.core.model.Elastic.ElasticBook;
 import com.springproject.core.Repository.BookRepository;
 import com.springproject.core.Repository.ElasticBookRepository;
 import com.springproject.core.dto.Attachment;
+import com.springproject.core.model.ExtractBookInfo;
 import lombok.RequiredArgsConstructor;
-import nl.siegmann.epublib.util.IOUtil;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,63 +23,84 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class AttachmentService {
+    private final Constants constants;
     private final BookRepository bookRepository;
+    private final BookFullInfoRepository bookFullInfoRepository;
     private final ElasticBookRepository elasticBookRepository;
+    private final CoverImageRepository coverImageRepository;
     private final EpubService epubService;
+    private final ModelMapper modelMapper;
 
-
-    public void saveBookEpub(MultipartFile bookEpub) throws Exception {
-        if (!Constants.type.equals(bookEpub.getContentType())) {
-            throw new Exception("Invalid type");
+    public void saveBookEpub(MultipartFile bookEpub, String uniqueString) {
+        if (!constants.type.equals(bookEpub.getContentType())) {
+            throw new InvalidBookTypeException("Invalid type of the file");
         }
-        String fileName = saveInExplorer(bookEpub);
+        String fileName = saveInExplorer(bookEpub, uniqueString);
         try (InputStream inputBook = bookEpub.getInputStream()) {
-            ElasticBook book = epubService.extractInfoFromEpub(inputBook);
-            Book bookDB = saveInDB(fileName, book.getTitle());
-            book.setId(bookDB.getId());
+            ExtractBookInfo fullBook = epubService.extractInfoFromEpub(inputBook);
+            fullBook.setSize(bookEpub.getSize());
+            Long bookId = saveInDB(fileName, fullBook);
+
+            ElasticBook book = modelMapper.map(fullBook, ElasticBook.class);
+            book.setId(bookId);
+
             double[] vector = new double[384];
-            for (int i = 0; i < 384; i++)
+            for (int i = 0; i < 150; i++)
+                vector[i] = 0.1;
+            for (int i = 150; i < 384; i++)
                 vector[i] = 1;
-            book.setMyVector(vector);
+            book.getChapters().forEach(chapter -> chapter.setVector(vector));
+
             elasticBookRepository.save(book);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-    private Book saveInDB(String fileName, String title) {
-        Optional<Book> oldBook = bookRepository.findByFileName(fileName);
-        if (oldBook.isPresent())
-            return oldBook.get();
-        Book bookDB = new Book();
+
+    private Long saveInDB(String fileName, ExtractBookInfo fullBook) {
+        Book bookDB = bookRepository.findByFileName(fileName).orElse(new Book());
+        bookDB.setTitle(fullBook.getTitle());
+        bookDB.setAuthors(fullBook.getAuthors().stream().reduce((acc, s) -> acc.concat(", " + s)).orElse(null));
         bookDB.setFileName(fileName);
-        bookDB.setTitle(title);
         bookDB = bookRepository.save(bookDB);
-        return bookDB;
+
+        BookFullInfo bookFullInfo = bookFullInfoRepository.findById(bookDB.getId())
+                .orElse(new BookFullInfo(bookDB));
+        modelMapper.map(fullBook, bookFullInfo);
+        bookFullInfoRepository.save(bookFullInfo);
+
+        CoverImage image = coverImageRepository.findById(bookDB.getId())
+                .orElse(new CoverImage(bookDB));
+        modelMapper.map(fullBook, image);
+        if (image.getMediaType() == null || image.getMediaType().isEmpty()) {
+            image.setMediaType(constants.defaultTypeOfImage);
+        }
+        coverImageRepository.save(image);
+        return bookDB.getId();
     }
-    private String saveInExplorer(MultipartFile bookEpub) throws Exception {
+    private String saveInExplorer(MultipartFile bookEpub, String uniqueString) {
         String root = System.getProperty("user.dir") + "\\";
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(bookEpub.getOriginalFilename()));
-        String path = root + Constants.storagePath + fileName;
+        String fileName = uniqueString + "-" + StringUtils.cleanPath(Objects.requireNonNull(bookEpub.getOriginalFilename()));
+        String path = root + constants.storagePath + fileName;
         try {
             if (fileName.contains("..")) {
-                throw new Exception("Filename contains invalid path sequence "
+                throw new SaveFileException("Filename contains invalid path sequence "
                         + fileName);
             }
             bookEpub.transferTo(Paths.get(path));
         } catch (Exception e) {
-            throw new Exception("Could not save File: " + fileName);
+            throw new SaveFileException("Could not save File: " + fileName);
         }
         return fileName;
     }
-    public void saveBookForTesting(String fileName, InputStream fileInputStream, InputStream fileInputStreamForEpub) throws IOException {
-
-        String root = System.getProperty("user.dir") + "\\";
-        String path = root + Constants.storagePath + fileName;
+    public void saveBookForTesting(String fileName, InputStream fileInputStream, InputStream fileInputStreamForEpub, long size, String uniqueString) {
+        fileName = uniqueString + "-" + fileName;
+                String root = System.getProperty("user.dir") + "\\";
+        String path = root + constants.storagePath + fileName;
         File file = new File(path);
         try (FileOutputStream outputStream = new FileOutputStream(file)) {
             byte[] buffer = new byte[1024];
@@ -83,13 +111,15 @@ public class AttachmentService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        ElasticBook book = epubService.extractInfoFromEpub(fileInputStreamForEpub);
-        Book bookDB = saveInDB(fileName, book.getTitle());
-        book.setId(bookDB.getId());
+        ExtractBookInfo fullBook = epubService.extractInfoFromEpub(fileInputStreamForEpub);
+        fullBook.setSize(size);
+        Long bookId = saveInDB(fileName, fullBook);
+        ElasticBook book = modelMapper.map(fullBook, ElasticBook.class);
+        book.setId(bookId);
         double[] vector = new double[384];
         for (int i = 0; i < 384; i++)
             vector[i] = 1;
-        book.setMyVector(vector);
+        book.getChapters().forEach(chapter -> chapter.setVector(vector));
         elasticBookRepository.save(book);
     }
 
@@ -97,7 +127,7 @@ public class AttachmentService {
     public Attachment getAttachment(Long fileId) throws Exception {
         Book book = bookRepository.findById(fileId).orElseThrow(() -> new Exception("Invalid id"));
 
-        try(InputStream inputStream = Files.newInputStream(Paths.get(Constants.storagePath + book.getFileName()))) {
+        try(InputStream inputStream = Files.newInputStream(Paths.get(constants.storagePath + book.getFileName()))) {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];
             int length;
