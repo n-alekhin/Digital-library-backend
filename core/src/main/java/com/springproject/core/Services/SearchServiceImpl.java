@@ -7,6 +7,7 @@ import com.springproject.core.dto.BookDTO;
 import com.springproject.core.model.Constants;
 import com.springproject.core.model.Elastic.search.BoolSearch;
 import com.springproject.core.model.Elastic.ElasticBook;
+import com.springproject.core.model.Elastic.search.Knn;
 import com.springproject.core.model.Elastic.search.KnnSearch;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -16,6 +17,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,6 +29,7 @@ public class SearchServiceImpl implements SearchService {
     private final Constants constants;
     private final ModelMapper modelMapper;
     private final BookRepository bookRepository;
+    private final VectorService vectorService;
     private BoolQuery.Builder buildBoolQuery(BoolQuery.Builder b, BoolSearch query) {
         if (query.getMust() != null && !query.getMust().keySet().isEmpty()) {
             b.must(
@@ -70,7 +73,16 @@ public class SearchServiceImpl implements SearchService {
                 .queryVector(query.getQuery_vector()));
     }
     @Override
-    public List<BookDTO> searchBookKnn(KnnSearch query) {
+    public List<BookDTO> searchBookKnn(Knn knn) {
+        KnnSearch query = new KnnSearch();
+        query.setField("chapters.vector");
+        query.setK(knn.getK());
+        query.setNumCandidates(knn.getNumCandidates());
+        List<Float> floatList = new ArrayList<>();
+        for (Double value : vectorService.getVector(knn.getQuery())) {
+            floatList.add(value.floatValue());
+        }
+        query.setQuery_vector(floatList);
         Query queryForElastic = new NativeQueryBuilder()
                 .withSearchType(null)
                 .withStoredFields(Collections.singletonList("id"))
