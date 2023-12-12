@@ -13,10 +13,13 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ElasticChapter {
-    @Field(name = "vector", dims = 384, index = true, type = FieldType.Dense_Vector)
+public class ElasticPartChapter {
+    @Field(name = "vector", dims = 768, index = true, type = FieldType.Dense_Vector, similarity = "dot_product")
     private List<Float> vector;
 
     @Field(type = FieldType.Text)
     private String content;
+    public ElasticPartChapter(String content) {
+        this.content = content;
+    }
 }

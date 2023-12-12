@@ -1,6 +1,6 @@
 package com.springproject.core.model;
 
-import com.springproject.core.model.Elastic.ElasticChapter;
+import com.springproject.core.model.Elastic.ElasticPartChapter;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,6 +17,6 @@ public class ExtractBookInfo {
     private String description;
     private String publisher;
     private Long size;
-    private List<ElasticChapter> chapters;
+    private List<ElasticPartChapter> chapters;
     private byte[] coverImage;
 }

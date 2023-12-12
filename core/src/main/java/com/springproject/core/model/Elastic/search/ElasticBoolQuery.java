@@ -11,7 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter
-public class ElasticMathQuery {
+public class ElasticBoolQuery {
     @Schema(example = "Harry Potter")
     private String query;
     @Schema(example = "And")

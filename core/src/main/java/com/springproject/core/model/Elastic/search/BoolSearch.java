@@ -10,7 +10,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BoolSearch {
-    private Map<String, ElasticMathQuery> must;
+    private Map<String, ElasticBoolQuery> must;
     @Schema(hidden = true)
     private Map<String, String> should;
     @Schema(hidden = true)

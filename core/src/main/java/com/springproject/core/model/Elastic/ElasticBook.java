@@ -22,6 +22,6 @@ public class ElasticBook {
     @Field(type = FieldType.Text)
     private List<String> authors;
     @Field(type = FieldType.Nested)
-    private List<ElasticChapter> chapters;
+    private List<ElasticPartChapter> chapters;
 
 }

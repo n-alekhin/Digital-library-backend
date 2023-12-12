@@ -49,11 +49,11 @@ public class BookController {
 
     @Operation(description = "В качестве \"additionalProp\" для запроса к содержанию книги указать \"chapters.content\"," +
             " для заголовка книги - \"title\", для авторов - \"authors\". Поля \"operator\" и \"fuzzy\" опциональные")
-    @GetMapping("/search/advanced")
+    @PostMapping("/search/advanced")
     public List<BookDTO> searchBookAdvanced(@RequestBody BoolSearch boolSearch) {
         return searchService.searchBookBool(boolSearch);
     }
-    @GetMapping("/search/semantic")
+    @PostMapping("/search/semantic")
     public List<BookDTO> knnSearch(@RequestBody Knn knn) {
         return searchService.searchBookKnn(knn);
     }
@@ -83,8 +83,9 @@ public class BookController {
                                 + "\"")
                 .body(new ByteArrayResource(image.getCoverImage()));
     }
-    @Operation(description = "В качестве тела form-data отправить файл")
-    @PostMapping(value = "/load", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    //@Operation(description = "В качестве тела form-data отправить файл")
+    //@PostMapping(value = "/load", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping("/load")
     public void loadBook(@RequestParam("book") MultipartFile bookEpub) throws SaveFileException {
         if (bookEpub.isEmpty()) {
             throw new SaveFileException("File not found");

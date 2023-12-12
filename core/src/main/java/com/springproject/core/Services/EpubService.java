@@ -1,6 +1,6 @@
 package com.springproject.core.Services;
 
-import com.springproject.core.model.Elastic.ElasticChapter;
+import com.springproject.core.model.Elastic.ElasticPartChapter;
 import com.springproject.core.model.ExtractBookInfo;
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.Resource;
@@ -11,12 +11,28 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class EpubService {
 
+    public List<String> divideString(String inputString) {
+        final int wordsLimit = 384;
+        List<String> result = new ArrayList<>();
+        List<String> words = Arrays.stream(inputString.split("\\s+")).toList(); // Разделение строки на слова по пробелам
+        int startIndex = 0;
+        int endIndex;
+        while (startIndex < words.size()) {
+            endIndex = Math.min(startIndex + wordsLimit, words.size());
+            result.add(String.join(" ", words.subList(startIndex, endIndex)));
+            startIndex = endIndex;
+        }
+        return result;
+    }
     public ExtractBookInfo extractInfoFromEpub(InputStream epubStream) {
         ExtractBookInfo fullBookInfo = new ExtractBookInfo();
 
@@ -31,17 +47,19 @@ public class EpubService {
                     .collect(Collectors.toList());
             fullBookInfo.setAuthors(authors);
 
-            List<ElasticChapter> chapters = book.getSpine().getSpineReferences().stream()
+            List<ElasticPartChapter> chaptersTmp = book.getSpine().getSpineReferences().stream()
                     .map(ref -> {
                         Resource res = ref.getResource();
                         try {
-                            ElasticChapter chapter = new ElasticChapter();
+                            ElasticPartChapter chapter = new ElasticPartChapter();
                             chapter.setContent(Jsoup.parse(new String(res.getData(), StandardCharsets.UTF_8)).text());
                             return chapter;
                         } catch (IOException e) {
                             throw new RuntimeException("Ошибка при чтении ресурса", e);
                         }
-                    }).collect(Collectors.toList());
+                    }).toList();
+            List<List<String>> tmp = chaptersTmp.stream().map(chapter -> divideString(chapter.getContent())).toList();
+            List<ElasticPartChapter> chapters = tmp.stream().flatMap(Collection::stream).map(ElasticPartChapter::new).collect(Collectors.toList());
             fullBookInfo.setChapters(chapters);
             if (book.getMetadata().getSubjects() != null) {
                 fullBookInfo.setGenres(book.getMetadata().getSubjects().stream().reduce((acc, s) -> acc.concat(", " + s)).orElse(null));
