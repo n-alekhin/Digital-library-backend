@@ -29,6 +29,8 @@ public class SearchServiceImpl implements SearchService {
     private final ModelMapper modelMapper;
     private final BookRepository bookRepository;
     private final VectorService vectorService;
+
+    private final WikidataService wikidataService;
     private BoolQuery.Builder buildBoolQuery(BoolQuery.Builder b, BoolSearch query) {
         if (query.getMust() != null && !query.getMust().keySet().isEmpty()) {
             b.must(
@@ -95,6 +97,12 @@ public class SearchServiceImpl implements SearchService {
                 .withQuery(q -> q.bool(b -> buildBoolQuery(b, boolQuery))).build();
         List<Long> ids = operations.search(queryForElastic, ElasticBook.class).getSearchHits().stream().map(h -> h.getContent().getId()).collect(Collectors.toList());
         return getBooksByIds(ids);
+    }
+
+    @Override
+    public List<BookDTO> searchWithWikidata(String in) {
+        System.out.println(wikidataService.enrichWithWikidata(in));
+        return null;
     }
 
     private List<BookDTO> getBooksByIds(List<Long> ids) {

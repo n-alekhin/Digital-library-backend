@@ -2,14 +2,19 @@ package com.springproject.core;
 
 import com.springproject.core.Services.VectorService;
 import com.springproject.core.Services.VectorServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.springproject.core.Services.WikidataService;
+import com.springproject.core.Services.WikidataServiceImpl;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.boot.autoconfigure.gson.GsonProperties;
 
 @SpringBootApplication
 public class CoreApplication {
 	private static final VectorService vectorService = new VectorServiceImpl();
+
+
+
+
 	public static void main(String[] args) {
 /*		EpubService epubService = new EpubService();
 
@@ -22,10 +27,9 @@ public class CoreApplication {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}*/
-
 		System.out.println(vectorService.getNounChunks("Non-fiction books about climate change"));
 		//System.out.println("gggg");
-		//SpringApplication.run(CoreApplication .class,args);
+		SpringApplication.run(CoreApplication .class,args);
 }
 
 }

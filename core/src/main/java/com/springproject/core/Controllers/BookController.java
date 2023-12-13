@@ -57,6 +57,12 @@ public class BookController {
     public List<BookDTO> knnSearch(@RequestBody Knn knn) {
         return searchService.searchBookKnn(knn);
     }
+
+    @GetMapping("/search/semantic2/{str}")
+    public List<BookDTO> Search(@PathVariable String str) {
+        System.out.println(str);
+        return searchService.searchWithWikidata(str);
+    }
     @GetMapping("/{bookId}")
     public DetailedBookDTO getDetailedBook(@PathVariable String bookId) {
         BookFullInfo bookFullInfo = bookFullInfoRepository.findById(Long.parseLong(bookId)).orElseThrow(() -> new BookNotFoundException("Book not found"));

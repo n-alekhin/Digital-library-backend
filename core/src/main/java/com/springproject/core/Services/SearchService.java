@@ -11,4 +11,6 @@ public interface SearchService {
     List<BookDTO> searchBookBool(BoolSearch query);
     List<BookDTO> searchBookKnn(Knn query);
     List<BookDTO> searchBookKnnAndBool(KnnSearch knnQuery, BoolSearch boolQuery);
+
+    List<BookDTO> searchWithWikidata(String in);
 }
