@@ -1,8 +1,8 @@
 package com.springproject.core.Mapper;
 
-import com.springproject.core.Entity.User;
-import com.springproject.core.dto.UserDto;
-import com.springproject.core.dto.domain.Role;
+import com.springproject.core.model.Entity.User;
+import com.springproject.core.model.dto.UserDto;
+import com.springproject.core.model.dto.domain.Role;
 import java.util.HashSet;
 import java.util.Objects;
 

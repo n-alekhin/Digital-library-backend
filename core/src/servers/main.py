@@ -19,5 +19,6 @@ def handle_request():
     return jsonify({'result': result})
 
 if __name__ == '__main__':
-    model = SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
+    #model = SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
+    model = SentenceTransformer('sentence-transformers/all-mpnet-base-v2')
     app.run(debug=True)

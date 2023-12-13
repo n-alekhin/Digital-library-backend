@@ -1,7 +1,7 @@
 package com.springproject.core.Controllers;
 
 import com.springproject.core.Services.UserService;
-import com.springproject.core.dto.UserDto;
+import com.springproject.core.model.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;

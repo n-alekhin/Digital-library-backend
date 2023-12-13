@@ -1,6 +1,6 @@
 package com.springproject.core.Repository;
 
-import com.springproject.core.Entity.User;
+import com.springproject.core.model.Entity.User;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 

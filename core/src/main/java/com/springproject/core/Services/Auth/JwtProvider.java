@@ -2,7 +2,7 @@ package com.springproject.core.Services.Auth;
 
 
 
-import com.springproject.core.dto.UserDto;
+import com.springproject.core.model.dto.UserDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -76,13 +76,11 @@ public class JwtProvider {
           .build()
           .parseClaimsJws(token);
       return true;
-    } catch (ExpiredJwtException expEx) {
     } catch (UnsupportedJwtException unsEx) {
       log.error("Unsupported jwt", unsEx);
     } catch (MalformedJwtException mjEx) {
       log.error("Malformed jwt", mjEx);
-    } catch (Exception e) {
-
+    } catch (Exception ignored) {
     }
     return false;
   }
