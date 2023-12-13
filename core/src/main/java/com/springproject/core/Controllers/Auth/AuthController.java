@@ -1,9 +1,9 @@
 package com.springproject.core.Controllers.Auth;
 
 import com.springproject.core.Services.Auth.AuthService;
-import com.springproject.core.dto.domain.JwtRequest;
-import com.springproject.core.dto.domain.JwtResponse;
-import com.springproject.core.dto.domain.RefreshJwtRequest;
+import com.springproject.core.model.dto.domain.JwtRequest;
+import com.springproject.core.model.dto.domain.JwtResponse;
+import com.springproject.core.model.dto.domain.RefreshJwtRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

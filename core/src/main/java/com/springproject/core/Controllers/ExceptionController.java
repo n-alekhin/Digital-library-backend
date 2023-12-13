@@ -1,6 +1,6 @@
 package com.springproject.core.Controllers;
 
-import com.springproject.core.dto.ErrorMessageDTO;
+import com.springproject.core.model.dto.ErrorMessageDTO;
 import com.springproject.core.exceptions.BookNotFoundException;
 import com.springproject.core.exceptions.InvalidBookTypeException;
 import org.springframework.http.HttpStatus;

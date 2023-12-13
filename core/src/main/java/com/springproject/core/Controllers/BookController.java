@@ -1,20 +1,20 @@
 package com.springproject.core.Controllers;
 
-import com.springproject.core.Entity.BookFullInfo;
-import com.springproject.core.Entity.CoverImage;
+import com.springproject.core.Services.attachment.AttachmentService;
+import com.springproject.core.model.Entity.BookFullInfo;
+import com.springproject.core.model.Entity.CoverImage;
 import com.springproject.core.Repository.BookFullInfoRepository;
 import com.springproject.core.Repository.CoverImageRepository;
 import com.springproject.core.Services.Auth.AuthService;
-import com.springproject.core.dto.BookDTO;
-import com.springproject.core.dto.DetailedBookDTO;
+import com.springproject.core.model.dto.BookDTO;
+import com.springproject.core.model.dto.DetailedBookDTO;
 import com.springproject.core.exceptions.BookNotFoundException;
 import com.springproject.core.exceptions.SaveFileException;
-import com.springproject.core.model.Constants;
-import com.springproject.core.model.Elastic.search.BoolSearch;
-import com.springproject.core.Services.AttachmentService;
-import com.springproject.core.Services.SearchService;
-import com.springproject.core.dto.Attachment;
-import com.springproject.core.model.Elastic.search.Knn;
+import com.springproject.core.model.data.Constants;
+import com.springproject.core.model.data.Elastic.search.BoolSearch;
+import com.springproject.core.Services.search.SearchService;
+import com.springproject.core.model.dto.Attachment;
+import com.springproject.core.model.data.Elastic.search.Knn;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -39,7 +39,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class BookController {
     private final Constants constants;
-    private final AttachmentService attachmentService;
+    private final AttachmentService attachmentServiceImpl;
     private final SearchService searchService;
     private final CoverImageRepository coverImageRepository;
     private final BookFullInfoRepository bookFullInfoRepository;
@@ -94,7 +94,7 @@ public class BookController {
         try {
             id = authService.getAuthInfo().getId().toString();
         } catch (ClassCastException ignore) {}
-        attachmentService.saveBookEpub(bookEpub, id);
+        attachmentServiceImpl.saveBookEpub(bookEpub, id);
     }
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Возвращает книгу в epub", content =
@@ -102,8 +102,8 @@ public class BookController {
             @ApiResponse(responseCode = "400", description = "В пути некорректный id"),
     })
     @GetMapping("/download/{bookId}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable Long bookId) throws Exception {
-        Attachment attachment = attachmentService.getAttachment(bookId);
+    public ResponseEntity<Resource> downloadFile(@PathVariable Long bookId) throws BookNotFoundException{
+        Attachment attachment = attachmentServiceImpl.getAttachment(bookId);
         return  ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(constants.type))
                 .header(HttpHeaders.CONTENT_DISPOSITION,
