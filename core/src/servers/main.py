@@ -17,7 +17,6 @@ def my_function(text):
 def handle_request():
     data = request.get_json()  # Получение данных из тела запроса
     input_string = data.get('input', '') if data else ''
-    print(input_string)
     result = my_function(input_string)
     return jsonify({'result': result})
 
@@ -44,8 +43,8 @@ def NLP():
     print(answer)
     return jsonify({'noun_chunks': answer})
 
+
 if __name__ == '__main__':
     #model = SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
-    model = SentenceTransformer('sentence-transformers/all-mpnet-base-v2')
+    model = SentenceTransformer('sentence-transformers/all-mpnet-base-v2', device='cuda')
     app.run(debug=True)
-
