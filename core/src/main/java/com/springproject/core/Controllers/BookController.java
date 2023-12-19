@@ -15,6 +15,7 @@ import com.springproject.core.model.data.Elastic.search.BoolSearch;
 import com.springproject.core.Services.search.SearchService;
 import com.springproject.core.model.dto.Attachment;
 import com.springproject.core.model.data.Elastic.search.Knn;
+import com.springproject.core.model.dto.WikidataSearchDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -57,6 +58,12 @@ public class BookController {
     public List<BookDTO> knnSearch(@RequestBody Knn knn) {
         return searchService.searchBookKnn(knn);
     }
+
+    @PostMapping("/search/semantic/wikidata")
+    public List<BookDTO> wikidataSearch(@RequestBody WikidataSearchDTO wikidataSearchDTO) {
+        return searchService.wikidataSearch(wikidataSearchDTO);
+    }
+
     @GetMapping("/{bookId}")
     public DetailedBookDTO getDetailedBook(@PathVariable String bookId) {
         BookFullInfo bookFullInfo = bookFullInfoRepository.findById(Long.parseLong(bookId)).orElseThrow(() -> new BookNotFoundException("Book not found"));
