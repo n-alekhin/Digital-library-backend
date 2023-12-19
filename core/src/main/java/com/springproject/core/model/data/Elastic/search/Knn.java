@@ -13,5 +13,6 @@ import lombok.Setter;
 public class Knn {
     private String query;
     private Integer k = 10;
+    private Float boost = 5f;
     private Integer numCandidates = 10;
 }

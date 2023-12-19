@@ -3,7 +3,6 @@ package com.springproject.core.Controllers;
 import com.springproject.core.Services.attachment.AttachmentServiceImpl;
 import com.springproject.core.Services.search.SearchService;
 import com.springproject.core.model.dto.BookDTO;
-import com.springproject.core.model.dto.KnnAndBoolSearch;
 import com.springproject.core.model.data.Elastic.ElasticBook;
 import com.springproject.core.Services.Auth.AuthService;
 import com.springproject.core.model.dto.domain.JwtAuthentication;
@@ -55,8 +54,8 @@ public class UtilityController {
     return searchService.searchBookKnn(knn);
   }
   @GetMapping("/knn-and-bool")
-  public List<BookDTO> knnSearch(@RequestBody KnnAndBoolSearch query) {
-    return searchService.searchBookKnnAndBool(query.getKnn(), query.getBool(), query.getBoostKnn());
+  public List<BookDTO> knnAndBoolSearch(@RequestBody Knn query) {
+    return searchService.searchBookKnnAndBool(query);
   }
 
   @PostMapping("/loadAllBooks")

@@ -1,12 +1,13 @@
 package com.springproject.core.Services.search;
 
-import com.springproject.core.dto.InputData;
 import com.springproject.core.dto.NounChunksDto;
-import com.springproject.core.dto.VectorDto;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
+import com.springproject.core.model.dto.InputData;
+import com.springproject.core.model.dto.RequestChunks;
+import com.springproject.core.model.dto.VectorDto;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -27,20 +28,20 @@ public class VectorServiceImpl implements VectorService{
     String url = "http://localhost:5000/";
 
     VectorDto vectorDto = restTemplate.postForObject(url, request, VectorDto.class);
-    return vectorDto.getResult();
+    return Objects.requireNonNull(vectorDto).getResult();
   }
 
-  public List<String> getNounChunks(String text) {
+  public List<String> getNounChunks(String text, boolean isVectorSearch) {
     RestTemplate restTemplate = new RestTemplate();
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
 
-    InputData inputData = new InputData(text);
-    HttpEntity<InputData> request = new HttpEntity<>(inputData, headers);
+    RequestChunks inputData = new RequestChunks(text, isVectorSearch);
+    HttpEntity<RequestChunks> request = new HttpEntity<>(inputData, headers);
 
     String url = "http://localhost:5000/NLP";
 
     NounChunksDto nounChunksDto = restTemplate.postForObject(url, request, NounChunksDto.class);
-    return nounChunksDto.getNoun_chunks();
+    return Objects.requireNonNull(nounChunksDto).getNoun_chunks();
   }
 }

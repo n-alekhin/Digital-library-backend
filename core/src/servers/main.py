@@ -24,6 +24,7 @@ def handle_request():
 def NLP():
     data = request.get_json()
     text = data.get("input", "") if data else ''
+    vector_search = data.get("vectorSearch", False) if data else False
     doc = nlp(text)
     noun_chunks = set(chunk.text for chunk in doc.noun_chunks)
     nouns = set(token.text for token in doc if token.pos_ == "NOUN")
@@ -33,10 +34,14 @@ def NLP():
     print(all_nouns)
     filtered_phrases = []
     for chunk in all_nouns:
-        # Разбиваем фразу на слова и фильтруем нежелательные части речи
-        words = [token.lemma_ for token in nlp(chunk) if token.pos_ not in ["DET", "PRON"]]
-        if words:
-            filtered_phrases.append(" ".join(words))
+        if vector_search:
+            words = [token.lemma_ for token in nlp(chunk) if token.pos_ == "NOUN"]
+            if words:
+                filtered_phrases += words
+        else:
+            words = [token.lemma_ for token in nlp(chunk) if token.pos_ not in ["DET", "PRON"]]
+            if words:
+                filtered_phrases.append(" ".join(words))
     print(filtered_phrases)
     x = set(filtered_phrases)
     answer = list(x)

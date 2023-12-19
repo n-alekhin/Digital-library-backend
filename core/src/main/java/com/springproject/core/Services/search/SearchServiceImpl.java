@@ -20,10 +20,7 @@ import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -51,8 +48,8 @@ public class SearchServiceImpl implements SearchService {
                                     )
                             )
                     )));
+            query.getMust().remove("chapters.content");
         }
-        query.getMust().remove("chapters.content");
         queries.addAll(query.getMust().keySet().stream().filter(k ->
                 !query.getMust().get(k).getQuery().isEmpty()).map(key ->
                 co.elastic.clients.elasticsearch._types.query_dsl.Query
@@ -132,16 +129,20 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    public List<BookDTO> searchBookKnnAndBool(Knn knn, BoolSearch boolQuery, Float boostKnn) {
+    public List<BookDTO> searchBookKnnAndBool(Knn knn) {
         KnnSearch knnQuery = new KnnSearch();
+        BoolSearch boolQuery = new BoolSearch();
         knnQuery.setK(knn.getK());
         knnQuery.setNumCandidates(knn.getNumCandidates());
         knnQuery.setQuery_vector(vectorService.getVector(knn.getQuery()));
-        System.out.println(boostKnn);
+        System.out.println(knn.getBoost());
+        ElasticBoolQuery searchByTitle = new ElasticBoolQuery();
+        searchByTitle.setQuery(String.join(" ", vectorService.getNounChunks(knn.getQuery(), true)));
+        boolQuery.setMust(Map.of("title", searchByTitle));
         Query queryForElastic = new NativeQueryBuilder()
                 .withSearchType(null)
                 .withStoredFields(Collections.singletonList("id"))
-                .withKnnQuery(buildKnnQuery(knnQuery, boostKnn))
+                .withKnnQuery(buildKnnQuery(knnQuery, knn.getBoost()))
                 .withQuery(q -> q.bool(b -> buildBoolQuery(b, boolQuery))).build();
         List<SearchHit<ElasticBook>> hits = operations.search(queryForElastic, ElasticBook.class).getSearchHits();
         hits.forEach(h -> log.info(h.getId() + " " + h.getScore()));

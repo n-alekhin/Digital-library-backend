@@ -9,5 +9,5 @@ import java.util.List;
 public interface SearchService {
     List<BookDTO> searchBookBool(BoolSearch query);
     List<BookDTO> searchBookKnn(Knn query);
-    List<BookDTO> searchBookKnnAndBool(Knn knn, BoolSearch boolQuery, Float boostKnn);
+    List<BookDTO> searchBookKnnAndBool(Knn knn);
 }
