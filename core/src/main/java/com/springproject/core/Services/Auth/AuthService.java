@@ -1,14 +1,14 @@
 package com.springproject.core.Services.Auth;
 
-import com.springproject.core.Entity.Token;
-import com.springproject.core.Entity.User;
+import com.springproject.core.model.Entity.Token;
+import com.springproject.core.model.Entity.User;
 import com.springproject.core.Mapper.UserMapperImpl;
 import com.springproject.core.Repository.UserRepository;
-import com.springproject.core.dto.UserDto;
-import com.springproject.core.dto.domain.JwtAuthentication;
-import com.springproject.core.dto.domain.JwtRequest;
-import com.springproject.core.dto.domain.JwtResponse;
-import com.springproject.core.dto.domain.Role;
+import com.springproject.core.model.dto.UserDto;
+import com.springproject.core.model.dto.domain.JwtAuthentication;
+import com.springproject.core.model.dto.domain.JwtRequest;
+import com.springproject.core.model.dto.domain.JwtResponse;
+import com.springproject.core.model.dto.domain.Role;
 import io.jsonwebtoken.Claims;
 import java.util.*;
 

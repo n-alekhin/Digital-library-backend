@@ -1,9 +1,9 @@
 package com.springproject.core.Services;
 
-import com.springproject.core.Entity.Token;
-import com.springproject.core.Entity.User;
+import com.springproject.core.model.Entity.Token;
+import com.springproject.core.model.Entity.User;
 import com.springproject.core.Repository.UserRepository;
-import com.springproject.core.dto.UserDto;
+import com.springproject.core.model.dto.UserDto;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

@@ -2,7 +2,7 @@ package com.springproject.core.Filter;
 
 import com.springproject.core.Services.Auth.JwtProvider;
 import com.springproject.core.Services.Auth.JwtUtils;
-import com.springproject.core.dto.domain.JwtAuthentication;
+import com.springproject.core.model.dto.domain.JwtAuthentication;
 import io.jsonwebtoken.Claims;
 import java.io.IOException;
 

@@ -1,14 +1,13 @@
 package com.springproject.core.Controllers;
 
-import com.springproject.core.Services.SearchService;
-import com.springproject.core.dto.BookDTO;
-import com.springproject.core.dto.KnnAndBoolSearch;
-import com.springproject.core.model.Elastic.ElasticBook;
-import com.springproject.core.Services.AttachmentService;
+import com.springproject.core.Services.attachment.AttachmentServiceImpl;
+import com.springproject.core.Services.search.SearchService;
+import com.springproject.core.model.dto.BookDTO;
+import com.springproject.core.model.dto.KnnAndBoolSearch;
+import com.springproject.core.model.data.Elastic.ElasticBook;
 import com.springproject.core.Services.Auth.AuthService;
-import com.springproject.core.dto.domain.JwtAuthentication;
-import com.springproject.core.model.Elastic.search.Knn;
-import com.springproject.core.model.Elastic.search.KnnSearch;
+import com.springproject.core.model.dto.domain.JwtAuthentication;
+import com.springproject.core.model.data.Elastic.search.Knn;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -30,7 +29,7 @@ import java.util.List;
 public class UtilityController {
 
   private final AuthService authService;
-  private final AttachmentService attachmentService;
+  private final AttachmentServiceImpl attachmentService;
   private final ElasticsearchOperations operations;
   private final SearchService searchService;
 

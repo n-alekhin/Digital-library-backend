@@ -1,7 +1,7 @@
 package com.springproject.core.Mapper;
 
-import com.springproject.core.Entity.BookFullInfo;
-import com.springproject.core.model.ExtractBookInfo;
+import com.springproject.core.model.Entity.BookFullInfo;
+import com.springproject.core.model.data.ExtractBookInfo;
 import org.modelmapper.Converter;
 import org.modelmapper.spi.MappingContext;
 

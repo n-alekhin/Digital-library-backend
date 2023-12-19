@@ -1,8 +1,8 @@
 package com.springproject.core.Services.Auth;
 
 
-import com.springproject.core.dto.domain.JwtAuthentication;
-import com.springproject.core.dto.domain.Role;
+import com.springproject.core.model.dto.domain.JwtAuthentication;
+import com.springproject.core.model.dto.domain.Role;
 import io.jsonwebtoken.Claims;
 import java.util.List;
 import java.util.Set;

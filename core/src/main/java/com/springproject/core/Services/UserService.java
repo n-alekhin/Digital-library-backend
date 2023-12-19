@@ -1,8 +1,8 @@
 package com.springproject.core.Services;
 
-import com.springproject.core.dto.UserDto;
+import com.springproject.core.model.dto.UserDto;
 
 public interface UserService {
-  public Long createUser(UserDto userDto, int role);
+  Long createUser(UserDto userDto, int role);
 
 }
