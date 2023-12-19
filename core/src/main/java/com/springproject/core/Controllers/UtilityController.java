@@ -56,17 +56,19 @@ public class UtilityController {
   }
   @GetMapping("/knn-and-bool")
   public List<BookDTO> knnSearch(@RequestBody KnnAndBoolSearch query) {
-    return searchService.searchBookKnnAndBool(query.getKnn(), query.getBool());
+    return searchService.searchBookKnnAndBool(query.getKnn(), query.getBool(), query.getBoostKnn());
   }
 
   @PostMapping("/loadAllBooks")
   public void loadAll() throws IOException {
-    String path = "C:\\Users\\User\\Desktop\\Study\\Digital Library\\books\\"; // директория, где лежат книги
+    //String path = "C:\\Users\\User\\Desktop\\Study\\Digital Library\\books\\"; // директория, где лежат книги
+    String path = "D:\\MiniProjects\\parseBook\\books\\";
     File directory = new File(path);
     if (directory.isDirectory()) {
       String[] fileNames = directory.list();
       if (fileNames != null) {
         for (String fileName : fileNames) {
+          System.out.println(fileName);
           Path filePath = Paths.get(path + fileName);
           File tmp = new File(path + fileName);
           attachmentService.saveBookForTesting(fileName, Files.newInputStream(filePath), Files.newInputStream(filePath), tmp.length(), "0");

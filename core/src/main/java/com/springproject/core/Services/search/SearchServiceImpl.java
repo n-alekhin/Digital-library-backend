@@ -16,11 +16,13 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -76,17 +78,14 @@ public class SearchServiceImpl implements SearchService {
         return b;
     }
 
-    @Override
-    public List<BookDTO> searchBookBool(BoolSearch query) {
-        Query query1 = new NativeQueryBuilder()
-                .withPageable(PageRequest.of(0, 10))
-                .withStoredFields(Collections.singletonList("id"))
-                .withQuery(q -> q.bool(b -> buildBoolQuery(b, query))).build();
-
-        List<Long> ids = operations.search(query1, ElasticBook.class).getSearchHits().stream().map(h -> h.getContent().getId()).collect(Collectors.toList());
-        return getBooksByIds(ids);
+    private KnnQuery buildKnnQuery(KnnSearch query, float boost) {
+        return KnnQuery.of(q -> q
+                .boost(boost)
+                .field(query.getField())
+                .k(query.getK())
+                .numCandidates(query.getNumCandidates())
+                .queryVector(query.getQuery_vector()));
     }
-
     private KnnQuery buildKnnQuery(KnnSearch query) {
         return KnnQuery.of(q -> q
                 .field(query.getField())
@@ -94,11 +93,31 @@ public class SearchServiceImpl implements SearchService {
                 .numCandidates(query.getNumCandidates())
                 .queryVector(query.getQuery_vector()));
     }
+    private List<BookDTO> getBooksByIds(List<Long> ids) {
+        return bookRepository.findAllById(ids).stream().map(b -> {
+            BookDTO book = modelMapper.map(b, BookDTO.class);
+            book.setCoverImageUrl(constants.getImagePath() + b.getId());
+            return book;
+        }).sorted(Comparator.comparingInt(book -> ids.indexOf(book.getId())))
+                .toList();
+    }
+
+    @Override
+    public List<BookDTO> searchBookBool(BoolSearch query) {
+        Query query1 = new NativeQueryBuilder()
+                .withPageable(PageRequest.of(0, 10))
+                .withStoredFields(Collections.singletonList("id"))
+                .withQuery(q -> q.bool(b -> buildBoolQuery(b, query))).build();
+        List<SearchHit<ElasticBook>> hits = operations.search(query1, ElasticBook.class).getSearchHits();
+        hits.forEach(h -> log.info(h.getId() + " " + h.getScore()));
+        List<Long> ids = hits.stream().map(h -> h.getContent().getId()).collect(Collectors.toList());
+        return getBooksByIds(ids);
+    }
+
 
     @Override
     public List<BookDTO> searchBookKnn(Knn knn) {
         KnnSearch query = new KnnSearch();
-        query.setField("chapters.vector");
         query.setK(knn.getK());
         query.setNumCandidates(knn.getNumCandidates());
         query.setQuery_vector(vectorService.getVector(knn.getQuery()));
@@ -106,26 +125,28 @@ public class SearchServiceImpl implements SearchService {
                 .withSearchType(null)
                 .withStoredFields(Collections.singletonList("id"))
                 .withKnnQuery(buildKnnQuery(query)).build();
-        List<Long> ids = operations.search(queryForElastic, ElasticBook.class).getSearchHits().stream().map(h -> h.getContent().getId()).collect(Collectors.toList());
+        List<SearchHit<ElasticBook>> hits = operations.search(queryForElastic, ElasticBook.class).getSearchHits();
+        hits.forEach(h -> log.info(h.getId() + " " + h.getScore()));
+        List<Long> ids = hits.stream().map(h -> h.getContent().getId()).collect(Collectors.toList());
         return getBooksByIds(ids);
     }
 
     @Override
-    public List<BookDTO> searchBookKnnAndBool(KnnSearch knnQuery, BoolSearch boolQuery) {
+    public List<BookDTO> searchBookKnnAndBool(Knn knn, BoolSearch boolQuery, Float boostKnn) {
+        KnnSearch knnQuery = new KnnSearch();
+        knnQuery.setK(knn.getK());
+        knnQuery.setNumCandidates(knn.getNumCandidates());
+        knnQuery.setQuery_vector(vectorService.getVector(knn.getQuery()));
+        System.out.println(boostKnn);
         Query queryForElastic = new NativeQueryBuilder()
                 .withSearchType(null)
                 .withStoredFields(Collections.singletonList("id"))
-                .withKnnQuery(buildKnnQuery(knnQuery))
+                .withKnnQuery(buildKnnQuery(knnQuery, boostKnn))
                 .withQuery(q -> q.bool(b -> buildBoolQuery(b, boolQuery))).build();
-        List<Long> ids = operations.search(queryForElastic, ElasticBook.class).getSearchHits().stream().map(h -> h.getContent().getId()).collect(Collectors.toList());
+        List<SearchHit<ElasticBook>> hits = operations.search(queryForElastic, ElasticBook.class).getSearchHits();
+        hits.forEach(h -> log.info(h.getId() + " " + h.getScore()));
+        List<Long> ids = hits.stream().map(h -> h.getContent().getId()).collect(Collectors.toList());
         return getBooksByIds(ids);
     }
 
-    private List<BookDTO> getBooksByIds(List<Long> ids) {
-        return bookRepository.findAllById(ids).stream().map(b -> {
-            BookDTO book = modelMapper.map(b, BookDTO.class);
-            book.setCoverImageUrl(constants.getImagePath() + b.getId());
-            return book;
-        }).collect(Collectors.toList());
-    }
 }
