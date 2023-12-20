@@ -40,7 +40,7 @@ public class WikidataServiceImpl implements WikidataService{
   public List<String> enrichWithWikidataListString(String in) {
     List<String> conceptList = vectorService.getNounChunks(in, false);
     List<WikidataRelation> wikidataRelationList;
-    List<String> out = new ArrayList<>();
+    List<String> out = new ArrayList<>(conceptList);
     for (String  concept :  conceptList) {
       wikidataRelationList = wikidataRelationRepository.findByWord1(concept);
       for (WikidataRelation relation: wikidataRelationList){

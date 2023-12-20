@@ -51,6 +51,7 @@ public class SearchServiceImpl implements SearchService {
                                     )
                             )
                     )));
+            System.out.println("123");
             query.getMust().remove("chapters.content");
         }
         queries.addAll(query.getMust().keySet().stream().filter(k ->
@@ -156,11 +157,11 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public List<BookDTO> wikidataSearch(WikidataSearchDTO wikidataSearchDTO) {
         BoolSearch boolSearch =  new BoolSearch();
-        List<String> wikidataStringList = wikidataService.enrichWithWikidataListString(
-            wikidataSearchDTO.getStringSearch());
-        for (String wikidataString : wikidataStringList){
-            boolSearch.addShouldCondition("chapters.content", wikidataString);
-        }
+
+
+        boolSearch.addMustCondition("chapters.content", "Sport");
+
+        System.out.println(boolSearch.getMust().get("chapters.content").getQuery());
         return searchBookBool(boolSearch);
     }
 
