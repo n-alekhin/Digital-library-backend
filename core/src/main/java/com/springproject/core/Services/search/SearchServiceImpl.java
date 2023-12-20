@@ -44,14 +44,19 @@ public class SearchServiceImpl implements SearchService {
                     .of(q -> q.nested(n -> n
                             .path("chapters")
                             .query(qi -> qi
-                                    .match(m -> m
-                                            .field("chapters.content")
-                                            .query(nested.getQuery())
-                                            .operator(nested.getOperator())
+                                    .bool(bool -> bool
+                                            .must(must -> must
+                                                    .match(m -> m
+                                                            .field("chapters.content")
+                                                            .query(nested.getQuery())
+                                                            .operator(nested.getOperator())
+                                                    )
+                                            )
                                     )
+
                             )
                     )));
-            System.out.println("123");
+            System.out.println(query.getMust().get("chapters.content"));
             query.getMust().remove("chapters.content");
         }
         queries.addAll(query.getMust().keySet().stream().filter(k ->
@@ -63,7 +68,7 @@ public class SearchServiceImpl implements SearchService {
                                 .fuzziness(query.getMust().get(key).getFuzzy())
                         ))
         ).toList());
-        if (query.getMust() != null && !query.getMust().keySet().isEmpty()) {
+        if (query.getMust() != null && !queries.isEmpty()) {
             b.must(queries);
         }
         if (query.getFilter() != null && !query.getFilter().keySet().isEmpty()) {
@@ -157,9 +162,11 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public List<BookDTO> wikidataSearch(WikidataSearchDTO wikidataSearchDTO) {
         BoolSearch boolSearch =  new BoolSearch();
-
-
-        boolSearch.addMustCondition("chapters.content", "Sport");
+        ElasticBoolQuery searchByTitle = new ElasticBoolQuery();
+        searchByTitle.setQuery("Sport");
+        Map<String, ElasticBoolQuery> map = new HashMap<>();
+        map.put("chapters.content", searchByTitle);
+        boolSearch.setMust(map);
 
         System.out.println(boolSearch.getMust().get("chapters.content").getQuery());
         return searchBookBool(boolSearch);
