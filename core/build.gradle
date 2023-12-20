@@ -6,10 +6,16 @@ plugins {
 }
 
 
-group = 'com.SpringProject'
+group = 'com.springproject'
 version = '0.0.1-SNAPSHOT'
 
-
+jar {
+	manifest {
+		attributes(
+				'Main-Class': 'com.springproject.core.CoreApplication'
+		)
+	}
+}
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
@@ -19,7 +25,10 @@ configurations {
 configurations.all {
 	exclude group: 'org.slf4j', module: 'slf4j-simple'
 }
-
+compileJava {
+	sourceCompatibility = '17'
+	targetCompatibility = '17'
+}
 java {
 	sourceCompatibility = '17'
 	targetCompatibility = '17'

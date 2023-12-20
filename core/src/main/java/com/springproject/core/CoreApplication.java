@@ -20,7 +20,7 @@ public class CoreApplication {
 		}*/
 
 
-		SpringApplication.run(CoreApplication .class,args);
+		SpringApplication.run(CoreApplication.class, args);
 }
 
 }
