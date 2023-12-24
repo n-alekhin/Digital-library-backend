@@ -38,7 +38,6 @@ public class ExtractEpubServiceImpl implements ExtractEpubService{
 
         try {
             Book book = (new EpubReader()).readEpub(epubStream);
-            book.getCoverPage();
             fullBookInfo.setTitle(book.getTitle());
             fullBookInfo.setPublisher(book.getMetadata().getPublishers().stream().findFirst().orElse(""));
 
@@ -70,7 +69,8 @@ public class ExtractEpubServiceImpl implements ExtractEpubService{
 
             fullBookInfo.setLanguage(book.getMetadata().getLanguage());
             String description = book.getMetadata().getDescriptions().stream().reduce((acc, s) -> acc.concat(". " + s)).orElse(null);
-            fullBookInfo.setDescription(description);
+            if (description != null)
+                fullBookInfo.setDescription(Jsoup.parse(description).text());
             if (book.getCoverImage() != null) {
                 fullBookInfo.setCoverImage(book.getCoverImage().getData());
                 fullBookInfo.setMediaType(book.getCoverImage().getMediaType().toString());
@@ -78,6 +78,7 @@ public class ExtractEpubServiceImpl implements ExtractEpubService{
                 fullBookInfo.setCoverImage(book.getCoverPage().getData());
                 fullBookInfo.setMediaType(book.getCoverPage().getMediaType().toString());
             }
+
 
         } catch (Exception e) {
             throw new RuntimeException("Ошибка при чтении EPUB", e);
