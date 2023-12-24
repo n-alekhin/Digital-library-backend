@@ -3,6 +3,7 @@ package com.springproject.core.Services.search;
 import co.elastic.clients.elasticsearch._types.KnnQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import com.springproject.core.Repository.BookRepository;
+import com.springproject.core.Services.WikidataService;
 import com.springproject.core.model.dto.BookDTO;
 import com.springproject.core.model.data.Constants;
 import com.springproject.core.model.data.Elastic.search.BoolSearch;
@@ -10,6 +11,7 @@ import com.springproject.core.model.data.Elastic.ElasticBook;
 import com.springproject.core.model.data.Elastic.search.ElasticBoolQuery;
 import com.springproject.core.model.data.Elastic.search.Knn;
 import com.springproject.core.model.data.Elastic.search.KnnSearch;
+import com.springproject.core.model.dto.WikidataSearchDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -32,6 +34,7 @@ public class SearchServiceImpl implements SearchService {
     private final ModelMapper modelMapper;
     private final BookRepository bookRepository;
     private final VectorService vectorService;
+    private final WikidataService wikidataService;
 
     private BoolQuery.Builder buildBoolQuery(BoolQuery.Builder b, BoolSearch query) {
         ElasticBoolQuery nested = query.getMust().get("chapters.content");
@@ -41,13 +44,19 @@ public class SearchServiceImpl implements SearchService {
                     .of(q -> q.nested(n -> n
                             .path("chapters")
                             .query(qi -> qi
-                                    .match(m -> m
-                                            .field("chapters.content")
-                                            .query(nested.getQuery())
-                                            .operator(nested.getOperator())
+                                    .bool(bool -> bool
+                                            .must(must -> must
+                                                    .match(m -> m
+                                                            .field("chapters.content")
+                                                            .query(nested.getQuery())
+                                                            .operator(nested.getOperator())
+                                                    )
+                                            )
                                     )
+
                             )
                     )));
+            System.out.println(query.getMust().get("chapters.content"));
             query.getMust().remove("chapters.content");
         }
         queries.addAll(query.getMust().keySet().stream().filter(k ->
@@ -59,7 +68,7 @@ public class SearchServiceImpl implements SearchService {
                                 .fuzziness(query.getMust().get(key).getFuzzy())
                         ))
         ).toList());
-        if (query.getMust() != null && !query.getMust().keySet().isEmpty()) {
+        if (query.getMust() != null && !queries.isEmpty()) {
             b.must(queries);
         }
         if (query.getFilter() != null && !query.getFilter().keySet().isEmpty()) {
@@ -148,6 +157,19 @@ public class SearchServiceImpl implements SearchService {
         hits.forEach(h -> log.info(h.getId() + " " + h.getScore()));
         List<Long> ids = hits.stream().map(h -> h.getContent().getId()).collect(Collectors.toList());
         return getBooksByIds(ids);
+    }
+
+    @Override
+    public List<BookDTO> wikidataSearch(WikidataSearchDTO wikidataSearchDTO) {
+        BoolSearch boolSearch =  new BoolSearch();
+        ElasticBoolQuery searchByTitle = new ElasticBoolQuery();
+        searchByTitle.setQuery("Sport");
+        Map<String, ElasticBoolQuery> map = new HashMap<>();
+        map.put("chapters.content", searchByTitle);
+        boolSearch.setMust(map);
+
+        System.out.println(boolSearch.getMust().get("chapters.content").getQuery());
+        return searchBookBool(boolSearch);
     }
 
 }

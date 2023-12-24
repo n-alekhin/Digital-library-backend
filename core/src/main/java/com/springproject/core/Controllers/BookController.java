@@ -15,6 +15,7 @@ import com.springproject.core.model.data.Elastic.search.BoolSearch;
 import com.springproject.core.Services.search.SearchService;
 import com.springproject.core.model.dto.Attachment;
 import com.springproject.core.model.data.Elastic.search.Knn;
+import com.springproject.core.model.dto.WikidataSearchDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -39,9 +40,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class BookController {
     private final Constants constants;
-    private final AttachmentService attachmentServiceImpl;
+    private final AttachmentService attachmentService;
     private final SearchService searchService;
-    private final CoverImageRepository coverImageRepository;
     private final BookFullInfoRepository bookFullInfoRepository;
     private final ModelMapper modelMapper;
     private final AuthService authService;
@@ -53,10 +53,17 @@ public class BookController {
     public List<BookDTO> searchBookAdvanced(@RequestBody BoolSearch boolSearch) {
         return searchService.searchBookBool(boolSearch);
     }
+
     @PostMapping("/search/semantic")
     public List<BookDTO> knnSearch(@RequestBody Knn knn) {
         return searchService.searchBookKnn(knn);
     }
+
+    @PostMapping("/search/semantic/wikidata")
+    public List<BookDTO> wikidataSearch(@RequestBody WikidataSearchDTO wikidataSearchDTO) {
+        return searchService.wikidataSearch(wikidataSearchDTO);
+    }
+
     @GetMapping("/{bookId}")
     public DetailedBookDTO getDetailedBook(@PathVariable String bookId) {
         BookFullInfo bookFullInfo = bookFullInfoRepository.findById(Long.parseLong(bookId)).orElseThrow(() -> new BookNotFoundException("Book not found"));
@@ -66,15 +73,16 @@ public class BookController {
         book.setAuthors(bookFullInfo.getBook().getAuthors());
         return book;
     }
+
     @Transactional
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Возвращает изображение обложки", content =
-                    { @Content(mediaType = "image/jpeg")}),
+                    {@Content(mediaType = "image/jpeg")}),
             @ApiResponse(responseCode = "400", description = "В пути некорректный id"),
     })
     @GetMapping("/cover/{bookId}")
     public ResponseEntity<Resource> getImageBook(@PathVariable String bookId) {
-        CoverImage image = coverImageRepository.getReferenceById(Long.parseLong(bookId));
+        CoverImage image = attachmentService.getCover(Long.parseLong(bookId));
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(image.getMediaType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION,
@@ -83,6 +91,7 @@ public class BookController {
                                 + "\"")
                 .body(new ByteArrayResource(image.getCoverImage()));
     }
+
     //@Operation(description = "В качестве тела form-data отправить файл")
     //@PostMapping(value = "/load", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PostMapping("/load")
@@ -93,18 +102,20 @@ public class BookController {
         String id = "0";
         try {
             id = authService.getAuthInfo().getId().toString();
-        } catch (ClassCastException ignore) {}
-        attachmentServiceImpl.saveBookEpub(bookEpub, id);
+        } catch (ClassCastException ignore) {
+        }
+        attachmentService.saveBookEpub(bookEpub, id);
     }
+
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Возвращает книгу в epub", content =
-                    { @Content(mediaType = "application/epub+zip")}),
+                    {@Content(mediaType = "application/epub+zip")}),
             @ApiResponse(responseCode = "400", description = "В пути некорректный id"),
     })
     @GetMapping("/download/{bookId}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable Long bookId) throws BookNotFoundException{
-        Attachment attachment = attachmentServiceImpl.getAttachment(bookId);
-        return  ResponseEntity.ok()
+    public ResponseEntity<Resource> downloadFile(@PathVariable Long bookId) throws BookNotFoundException {
+        Attachment attachment = attachmentService.getAttachment(bookId);
+        return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(constants.type))
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=\"" + attachment.getName()

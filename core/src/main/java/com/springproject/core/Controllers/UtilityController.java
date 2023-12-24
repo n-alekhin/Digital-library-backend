@@ -61,7 +61,7 @@ public class UtilityController {
   @PostMapping("/loadAllBooks")
   public void loadAll() throws IOException {
     //String path = "C:\\Users\\User\\Desktop\\Study\\Digital Library\\books\\"; // директория, где лежат книги
-    String path = "D:\\MiniProjects\\parseBook\\books\\";
+    String path = "C:/Users/1/Downloads/books2/books2/";
     File directory = new File(path);
     if (directory.isDirectory()) {
       String[] fileNames = directory.list();

@@ -7,8 +7,8 @@ import java.util.Map;
 @Getter
 @Setter
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class BoolSearch {
     private Map<String, ElasticBoolQuery> must;
     @Schema(hidden = true)

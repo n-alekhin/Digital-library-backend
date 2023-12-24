@@ -2,6 +2,7 @@ package com.springproject.core.Services.attachment;
 
 import com.springproject.core.Services.search.VectorService;
 import com.springproject.core.exceptions.BookNotFoundException;
+import com.springproject.core.exceptions.CoverNotFoundException;
 import com.springproject.core.model.Entity.Book;
 import com.springproject.core.model.Entity.BookFullInfo;
 import com.springproject.core.model.Entity.CoverImage;
@@ -15,6 +16,7 @@ import com.springproject.core.Repository.BookRepository;
 import com.springproject.core.Repository.ElasticBookRepository;
 import com.springproject.core.model.dto.Attachment;
 import com.springproject.core.model.data.ExtractBookInfo;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -132,6 +135,33 @@ public class AttachmentServiceImpl implements AttachmentService{
             return new Attachment(book.getFileName(), bytes);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public CoverImage getCover(Long bookId) {
+        CoverImage image;
+        try {
+            image = coverImageRepository.getReferenceById(bookId);
+            if (image.getCoverImage().length < 6000) {
+                image = getDefaultCover();
+            }
+        } catch (EntityNotFoundException ignored) {
+            image = getDefaultCover();
+        }
+        return image;
+    }
+    private CoverImage getDefaultCover() {
+        Random rand = new Random();
+        int randomInt = rand.nextInt(1, 9);
+        CoverImage image = new CoverImage();
+        try (InputStream cover = new FileInputStream("src/main/resources/images/defaultCover" +
+                randomInt +".png")) {
+            image.setCoverImage(cover.readAllBytes());
+            image.setMediaType("image/png");
+            return image;
+        } catch (IOException ignored1) {
+            throw new CoverNotFoundException("Cover not found");
         }
     }
 
