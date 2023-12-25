@@ -163,13 +163,11 @@ public class SearchServiceImpl implements SearchService {
     public List<BookDTO> wikidataSearch(WikidataSearchDTO wikidataSearchDTO) {
         BoolSearch boolSearch =  new BoolSearch();
         ElasticBoolQuery searchByTitle = new ElasticBoolQuery();
-        searchByTitle.setQuery("Sport");
+        searchByTitle.setQuery(wikidataService.enrichWithWikidata(wikidataSearchDTO.getStringSearch()));
         Map<String, ElasticBoolQuery> map = new HashMap<>();
         map.put("chapters.content", searchByTitle);
         boolSearch.setMust(map);
-
         System.out.println(boolSearch.getMust().get("chapters.content").getQuery());
         return searchBookBool(boolSearch);
     }
-
 }

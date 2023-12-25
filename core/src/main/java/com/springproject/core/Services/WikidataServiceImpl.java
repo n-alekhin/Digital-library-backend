@@ -28,6 +28,9 @@ public class WikidataServiceImpl implements WikidataService{
     List<WikidataRelation> wikidataRelationList;
     StringBuilder out = new StringBuilder();
     for (String  concept :  conceptList) {
+        out.append(' ').append(concept);
+    }
+    for (String  concept :  conceptList) {
       wikidataRelationList = wikidataRelationRepository.findByWord1(concept);
       for (WikidataRelation relation: wikidataRelationList){
         out.append(' ').append(relation.getWordId2());
