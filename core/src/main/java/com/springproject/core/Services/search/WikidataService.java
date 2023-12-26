@@ -1,4 +1,4 @@
-package com.springproject.core.Services;
+package com.springproject.core.Services.search;
 
 import java.util.List;
 

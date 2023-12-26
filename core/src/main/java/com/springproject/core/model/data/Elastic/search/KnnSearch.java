@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class KnnSearch {
     private String field = "chapters.vector";
-    private Integer k = 10;
-    private Integer numCandidates = 10;
+    private Integer k = 20;
+    private Integer numCandidates = 30;
     private List<Float> query_vector;
 }

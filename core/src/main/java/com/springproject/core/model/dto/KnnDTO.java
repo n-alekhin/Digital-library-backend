@@ -1,4 +1,4 @@
-package com.springproject.core.model.data.Elastic.search;
+package com.springproject.core.model.dto;
 
 
 import lombok.AllArgsConstructor;
@@ -10,9 +10,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Knn {
+public class KnnDTO {
     private String query;
-    private Integer k = 10;
+    private Integer k = 20;
     private Float boost = 5f;
-    private Integer numCandidates = 10;
+    private Integer numCandidates = 30;
 }

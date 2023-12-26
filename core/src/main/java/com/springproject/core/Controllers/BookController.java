@@ -4,7 +4,6 @@ import com.springproject.core.Services.attachment.AttachmentService;
 import com.springproject.core.model.Entity.BookFullInfo;
 import com.springproject.core.model.Entity.CoverImage;
 import com.springproject.core.Repository.BookFullInfoRepository;
-import com.springproject.core.Repository.CoverImageRepository;
 import com.springproject.core.Services.Auth.AuthService;
 import com.springproject.core.model.dto.BookDTO;
 import com.springproject.core.model.dto.DetailedBookDTO;
@@ -14,7 +13,7 @@ import com.springproject.core.model.data.Constants;
 import com.springproject.core.model.data.Elastic.search.BoolSearch;
 import com.springproject.core.Services.search.SearchService;
 import com.springproject.core.model.dto.Attachment;
-import com.springproject.core.model.data.Elastic.search.Knn;
+import com.springproject.core.model.dto.KnnDTO;
 import com.springproject.core.model.dto.WikidataSearchDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -55,8 +54,12 @@ public class BookController {
     }
 
     @PostMapping("/search/semantic")
-    public List<BookDTO> knnSearch(@RequestBody Knn knn) {
-        return searchService.searchBookKnn(knn);
+    public List<BookDTO> knnSearch(@RequestBody KnnDTO knnDTO) {
+        return searchService.searchBookKnn(knnDTO);
+    }
+    @PostMapping("/search/semantic/knn-expanded")
+    public List<BookDTO> knnAndBoolSearch(@RequestBody KnnDTO query) {
+        return searchService.searchBookKnnExpanded(query);
     }
 
     @PostMapping("/search/semantic/wikidata")

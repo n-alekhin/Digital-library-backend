@@ -1,12 +1,15 @@
 package com.springproject.core.Controllers;
 
+import com.springproject.core.Repository.BookFullInfoRepository;
 import com.springproject.core.Services.attachment.AttachmentServiceImpl;
 import com.springproject.core.Services.search.SearchService;
+import com.springproject.core.model.Entity.BookFullInfo;
 import com.springproject.core.model.dto.BookDTO;
 import com.springproject.core.model.data.Elastic.ElasticBook;
 import com.springproject.core.Services.Auth.AuthService;
+import com.springproject.core.model.dto.DetailedBookDTO;
 import com.springproject.core.model.dto.domain.JwtAuthentication;
-import com.springproject.core.model.data.Elastic.search.Knn;
+import com.springproject.core.model.dto.KnnDTO;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -31,6 +34,7 @@ public class UtilityController {
   private final AttachmentServiceImpl attachmentService;
   private final ElasticsearchOperations operations;
   private final SearchService searchService;
+  private final BookFullInfoRepository bookFullInfoRepository;
 
   @PreAuthorize("hasAuthority('USER')")
   @GetMapping("/hello")
@@ -49,19 +53,15 @@ public class UtilityController {
   public Boolean deleteIndex() {
     return operations.indexOps(ElasticBook.class).delete();
   }
-  @GetMapping("/knn")
-  public List<BookDTO> knnSearch(@RequestBody Knn knn) {
-    return searchService.searchBookKnn(knn);
-  }
   @GetMapping("/knn-and-bool")
-  public List<BookDTO> knnAndBoolSearch(@RequestBody Knn query) {
-    return searchService.searchBookKnnAndBool(query);
+  public List<BookDTO> knnAndBoolSearch(@RequestBody KnnDTO query) {
+    return searchService.searchBookKnnExpanded(query);
   }
 
   @PostMapping("/loadAllBooks")
   public void loadAll() throws IOException {
-    //String path = "C:\\Users\\User\\Desktop\\Study\\Digital Library\\books\\"; // директория, где лежат книги
-    String path = "C:/Users/1/Downloads/books2/books2/";
+    String path = "C:\\Users\\User\\Desktop\\Study\\Digital Library\\books2\\"; // директория, где лежат книги
+    //String path = "C:/Users/1/Downloads/books2/books2/";
     File directory = new File(path);
     if (directory.isDirectory()) {
       String[] fileNames = directory.list();
@@ -74,6 +74,12 @@ public class UtilityController {
         }
       }
     }
+  }
+  @PostMapping("/change/{id}/description")
+  public void changeDescription(@PathVariable Long id, @RequestBody DetailedBookDTO description) {
+    BookFullInfo book = bookFullInfoRepository.findById(id).orElseThrow();
+    book.setDescription(description.getDescription());
+    bookFullInfoRepository.save(book);
   }
 
 }

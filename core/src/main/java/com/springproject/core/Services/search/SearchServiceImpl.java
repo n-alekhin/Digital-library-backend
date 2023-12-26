@@ -3,13 +3,12 @@ package com.springproject.core.Services.search;
 import co.elastic.clients.elasticsearch._types.KnnQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import com.springproject.core.Repository.BookRepository;
-import com.springproject.core.Services.WikidataService;
 import com.springproject.core.model.dto.BookDTO;
 import com.springproject.core.model.data.Constants;
 import com.springproject.core.model.data.Elastic.search.BoolSearch;
 import com.springproject.core.model.data.Elastic.ElasticBook;
 import com.springproject.core.model.data.Elastic.search.ElasticBoolQuery;
-import com.springproject.core.model.data.Elastic.search.Knn;
+import com.springproject.core.model.dto.KnnDTO;
 import com.springproject.core.model.data.Elastic.search.KnnSearch;
 import com.springproject.core.model.dto.WikidataSearchDTO;
 import lombok.RequiredArgsConstructor;
@@ -111,7 +110,7 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public List<BookDTO> searchBookBool(BoolSearch query) {
         Query query1 = new NativeQueryBuilder()
-                .withPageable(PageRequest.of(0, 10))
+                .withPageable(PageRequest.of(0, 20))
                 .withStoredFields(Collections.singletonList("id"))
                 .withQuery(q -> q.bool(b -> buildBoolQuery(b, query))).build();
         List<SearchHit<ElasticBook>> hits = operations.search(query1, ElasticBook.class).getSearchHits();
@@ -122,11 +121,11 @@ public class SearchServiceImpl implements SearchService {
 
 
     @Override
-    public List<BookDTO> searchBookKnn(Knn knn) {
+    public List<BookDTO> searchBookKnn(KnnDTO knnDTO) {
         KnnSearch query = new KnnSearch();
-        query.setK(knn.getK());
-        query.setNumCandidates(knn.getNumCandidates());
-        query.setQuery_vector(vectorService.getVector(knn.getQuery()));
+        query.setK(knnDTO.getK());
+        query.setNumCandidates(knnDTO.getNumCandidates());
+        query.setQuery_vector(vectorService.getVector(knnDTO.getQuery()));
         Query queryForElastic = new NativeQueryBuilder()
                 .withSearchType(null)
                 .withStoredFields(Collections.singletonList("id"))
@@ -138,20 +137,20 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    public List<BookDTO> searchBookKnnAndBool(Knn knn) {
+    public List<BookDTO> searchBookKnnExpanded(KnnDTO knnDTO) {
         KnnSearch knnQuery = new KnnSearch();
         BoolSearch boolQuery = new BoolSearch();
-        knnQuery.setK(knn.getK());
-        knnQuery.setNumCandidates(knn.getNumCandidates());
-        knnQuery.setQuery_vector(vectorService.getVector(knn.getQuery()));
-        System.out.println(knn.getBoost());
+        knnQuery.setK(knnDTO.getK());
+        knnQuery.setNumCandidates(knnDTO.getNumCandidates());
+        knnQuery.setQuery_vector(vectorService.getVector(knnDTO.getQuery()));
+        System.out.println(knnDTO.getBoost());
         ElasticBoolQuery searchByTitle = new ElasticBoolQuery();
-        searchByTitle.setQuery(String.join(" ", vectorService.getNounChunks(knn.getQuery(), true)));
+        searchByTitle.setQuery(String.join(" ", vectorService.getNounChunks(knnDTO.getQuery(), true)));
         boolQuery.setMust(Map.of("title", searchByTitle));
         Query queryForElastic = new NativeQueryBuilder()
                 .withSearchType(null)
                 .withStoredFields(Collections.singletonList("id"))
-                .withKnnQuery(buildKnnQuery(knnQuery, knn.getBoost()))
+                .withKnnQuery(buildKnnQuery(knnQuery, knnDTO.getBoost()))
                 .withQuery(q -> q.bool(b -> buildBoolQuery(b, boolQuery))).build();
         List<SearchHit<ElasticBook>> hits = operations.search(queryForElastic, ElasticBook.class).getSearchHits();
         hits.forEach(h -> log.info(h.getId() + " " + h.getScore()));
@@ -162,12 +161,11 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public List<BookDTO> wikidataSearch(WikidataSearchDTO wikidataSearchDTO) {
         BoolSearch boolSearch =  new BoolSearch();
-        ElasticBoolQuery searchByTitle = new ElasticBoolQuery();
-        searchByTitle.setQuery("Sport");
+        ElasticBoolQuery searchByContent = new ElasticBoolQuery();
+        searchByContent.setQuery(wikidataService.enrichWithWikidata(wikidataSearchDTO.getQuery()));
         Map<String, ElasticBoolQuery> map = new HashMap<>();
-        map.put("chapters.content", searchByTitle);
+        map.put("chapters.content", searchByContent);
         boolSearch.setMust(map);
-
         System.out.println(boolSearch.getMust().get("chapters.content").getQuery());
         return searchBookBool(boolSearch);
     }

@@ -16,6 +16,6 @@ public class ElasticBoolQuery {
     private String query;
     @Schema(example = "And")
     private Operator operator = Operator.Or;
-    @Schema(example = "AUTO:3,10")
-    private String fuzzy = null;
+    @Schema(example = "AUTO:4,10") // 0..3 - точное, 4..9 - 1, >9 - 2
+    private String fuzzy = "AUTO:4,10";
 }

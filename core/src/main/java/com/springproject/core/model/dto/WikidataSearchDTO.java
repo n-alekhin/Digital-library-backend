@@ -6,5 +6,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class WikidataSearchDTO {
-  private String stringSearch;
+  private String query;
 }
