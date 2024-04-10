@@ -2,8 +2,8 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost/library
     username: postgres
-    password: qwerty
-
+    password: 
+    driver-class-name: org.postgresql.Driver
   jpa:
     generate-ddl: true
     properties:
@@ -11,15 +11,13 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
-server:
-  port: 20000
 jwt:
   secret:
     access: qBTmv4oXFFR2GwjexDJ4t6fsIUIUhhXqlktXjXdkcyygs8nPVEwMfo29VDRRepYDVV5IkIxBMzr7OEHXEHd37w==
     refresh: zL1HB3Pch05Avfynovxrf/kpF9O2m4NCWKJUjEp27s9J2jEG3ifiKCGylaZ8fDeoONSTJP/wAzKawB8F9rOMNg==
 application:
   security:
-    allowed-origin: http://localhost:80
+    allowed-origin: http://192.168.137.169
 
 
 

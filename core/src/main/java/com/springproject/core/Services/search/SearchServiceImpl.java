@@ -128,6 +128,7 @@ public class SearchServiceImpl implements SearchService {
         query.setQuery_vector(vectorService.getVector(knnDTO.getQuery()));
         Query queryForElastic = new NativeQueryBuilder()
                 .withSearchType(null)
+                .withPageable(PageRequest.of(0, 20))
                 .withStoredFields(Collections.singletonList("id"))
                 .withKnnQuery(buildKnnQuery(query)).build();
         List<SearchHit<ElasticBook>> hits = operations.search(queryForElastic, ElasticBook.class).getSearchHits();
@@ -149,6 +150,7 @@ public class SearchServiceImpl implements SearchService {
         boolQuery.setMust(Map.of("title", searchByTitle));
         Query queryForElastic = new NativeQueryBuilder()
                 .withSearchType(null)
+                .withPageable(PageRequest.of(0, 20))
                 .withStoredFields(Collections.singletonList("id"))
                 .withKnnQuery(buildKnnQuery(knnQuery, knnDTO.getBoost()))
                 .withQuery(q -> q.bool(b -> buildBoolQuery(b, boolQuery))).build();
