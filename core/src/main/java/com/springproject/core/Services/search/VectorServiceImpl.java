@@ -5,9 +5,11 @@ import com.springproject.core.dto.NounChunksDto;
 import java.util.List;
 import java.util.Objects;
 
+import com.springproject.core.model.data.Constants;
 import com.springproject.core.model.dto.InputData;
 import com.springproject.core.model.dto.RequestChunks;
 import com.springproject.core.model.dto.VectorDto;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -15,7 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
+@RequiredArgsConstructor
 public class VectorServiceImpl implements VectorService{
+  private final Constants constants;
 
   public List<Float> getVector(String inputString) {
     RestTemplate restTemplate = new RestTemplate();
@@ -25,9 +29,7 @@ public class VectorServiceImpl implements VectorService{
     InputData inputData = new InputData(inputString);
     HttpEntity<InputData> request = new HttpEntity<>(inputData, headers);
 
-    String url = "http://localhost:5000/";
-
-    VectorDto vectorDto = restTemplate.postForObject(url, request, VectorDto.class);
+    VectorDto vectorDto = restTemplate.postForObject(constants.pythonUrl, request, VectorDto.class);
     return Objects.requireNonNull(vectorDto).getResult();
   }
 
@@ -39,7 +41,7 @@ public class VectorServiceImpl implements VectorService{
     RequestChunks inputData = new RequestChunks(text, isVectorSearch);
     HttpEntity<RequestChunks> request = new HttpEntity<>(inputData, headers);
 
-    String url = "http://localhost:5000/NLP";
+    String url = constants.pythonUrl + "NLP";
 
     NounChunksDto nounChunksDto = restTemplate.postForObject(url, request, NounChunksDto.class);
     return Objects.requireNonNull(nounChunksDto).getNoun_chunks();

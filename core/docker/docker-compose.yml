@@ -1,0 +1,62 @@
+version: '2.1'
+
+services:
+  db:
+    build:
+      context: .
+      dockerfile: db.Dockerfile
+    container_name: db
+    volumes:
+      - ${POSTGRESQL_LOCAL_PATH}:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${POSTGRESQL_USER}
+      - POSTGRES_PASSWORD=${POSTGRESQL_PASSWORD}
+    ports:
+      - ${POSTGRESQL_PORT}:5432
+  elastic:
+    image: 'elasticsearch:8.11.1'
+    container_name: elastic
+    ports:
+      - "9200:9200"
+    volumes:
+      - ${ELASTIC_DATA}:/usr/share/elasticsearch/data
+    healthcheck:
+      test: curl -s http://elastic:9200 >/dev/null || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+    environment:
+      - node.name=es01
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - cluster.initial_master_nodes=es01
+      - discovery.seed_hosts=[]
+  app:
+    build:
+      context: .
+    container_name: digital-library
+
+    depends_on:
+      db:
+        condition: service_started
+      elastic:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/library
+      - SPRING_DATASOURCE_USERNAME=${POSTGRESQL_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRESQL_PASSWORD}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+  processor:
+    build:
+      context: .
+      dockerfile: python.Dockerfile
+    container_name: python-server
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=main.py

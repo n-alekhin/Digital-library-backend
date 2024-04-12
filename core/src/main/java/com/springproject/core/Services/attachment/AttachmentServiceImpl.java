@@ -155,7 +155,7 @@ public class AttachmentServiceImpl implements AttachmentService{
         Random rand = new Random();
         int randomInt = rand.nextInt(1, 9);
         CoverImage image = new CoverImage();
-        try (InputStream cover = new FileInputStream("src/main/resources/images/defaultCover" +
+        try (InputStream cover = new FileInputStream(constants.defaultImages +
                 randomInt +".png")) {
             image.setCoverImage(cover.readAllBytes());
             image.setMediaType("image/png");

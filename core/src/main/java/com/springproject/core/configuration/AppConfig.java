@@ -4,6 +4,7 @@ import com.springproject.core.Mapper.CoverImageMapper;
 import com.springproject.core.Mapper.FullBookMapper;
 import jakarta.servlet.MultipartConfigElement;
 import org.modelmapper.ModelMapper;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,11 +12,18 @@ import org.springframework.util.unit.DataSize;
 
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
+
 @Configuration
 public class AppConfig {
+
   @Bean
-  public RestTemplate restTemplate() {
-    return new RestTemplate();
+  public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder)
+  {
+    return restTemplateBuilder
+            .setConnectTimeout(Duration.ofHours(1))
+           .setReadTimeout(Duration.ofHours(1))
+           .build();
   }
 
   @Bean

@@ -5,7 +5,8 @@ import spacy
 import torch
 
 app = Flask(__name__)
-model = None
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model = SentenceTransformer('sentence-transformers/all-mpnet-base-v2', device=device)
 nlp = spacy.load("en_core_web_sm")
 
 def my_function(text):
@@ -52,6 +53,4 @@ def NLP():
 
 if __name__ == '__main__':
     #model = SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = SentenceTransformer('sentence-transformers/all-mpnet-base-v2', device=device)
     app.run(debug=True)

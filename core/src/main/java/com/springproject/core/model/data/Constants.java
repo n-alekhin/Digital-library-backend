@@ -5,7 +5,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class Constants {
-    public final String storagePath = "src\\main\\resources\\client\\book\\";
+    public final String storagePath = "client\\book\\";
+    public final String defaultImages = "client/images/defaultCover";
+    public final String pythonUrl = "http://python-server:5000/";
+    public static final String elastic = "elastic:9200";
     @Value("${server.port:8080}")
     private String port;
     public final String type = "application/epub+zip";
