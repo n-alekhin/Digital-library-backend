@@ -13,8 +13,8 @@ public class UserDto {
   @Schema(hidden = true)
   private Long id;
   private String login;
+  private String name;
   private String password;
   @Schema(hidden = true)
   private Set<Role> roles;
-
 }

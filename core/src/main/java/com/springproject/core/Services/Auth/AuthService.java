@@ -12,6 +12,7 @@ import com.springproject.core.model.dto.domain.Role;
 import io.jsonwebtoken.Claims;
 import java.util.*;
 
+import jakarta.security.auth.message.AuthException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,14 +52,27 @@ public class AuthService  {
       return new JwtResponse(userDto.getId() ,accessToken, refreshToken);
   }
 
+  public JwtResponse reg(@NonNull UserDto userDto, User user) {
+
+    //userDto.setRoles(new HashSet<>(Collections.singletonList(Role.valueOf(user.getRole()))));
+    String accessToken = jwtProvider.generateAccessToken(userDto);
+    String refreshToken = jwtProvider.generateRefreshToken(userDto);
+    //revokeAllUserTokens(user);
+    Token token = user.getToken();
+    token.setRefreshToken(refreshToken);
+    userRepository.save(user);
+    return new JwtResponse(user.getId() ,accessToken, refreshToken);
+  }
+
   public JwtResponse getAccessToken(@NonNull String refreshToken){
     if (jwtProvider.validateRefreshToken(refreshToken)) {
       final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
       final String login = claims.getSubject();
 
       Optional<User> optionalUser = userRepository.getByLogin(login);
-//      if (!optionalUser.isPresent())
+//      if (!optionalUser.isPresent()) {
 //        throw new AuthException();
+//      }
       final String saveRefreshToken = optionalUser.get().getToken().getRefreshToken();
       if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
         final UserDto userDto = UserMapperImpl.toUserDto(optionalUser.get());

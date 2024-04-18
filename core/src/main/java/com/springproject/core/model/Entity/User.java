@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -24,17 +25,21 @@ public class User implements UserDetails {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
 
+  private String name;
+
   private String login;
 
   private String password;
   private String role;
+
+  private Boolean isBanned = false;
 
   @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
   private Token token;
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return Collections.singletonList(new SimpleGrantedAuthority(role));
+    return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + this.role));
   }
 
   @Override

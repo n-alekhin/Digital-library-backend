@@ -42,7 +42,6 @@ public class JwtProvider {
     final Date accessExpiration = Date.from(accessExpirationInstant);
     return Jwts.builder()
             .claim("id",  userDto.getId())
-            .claim("roles", userDto.getRoles())
             .setSubject(userDto.getLogin())
             .setExpiration(accessExpiration)
             .signWith(jwtAccessSecret)
@@ -94,13 +93,12 @@ public class JwtProvider {
   }
 
 
-
   private Claims getClaims(@NonNull String token, @NonNull Key secret) {
     return Jwts.parserBuilder()
-        .setSigningKey(secret)
-        .build()
-        .parseClaimsJws(token)
-        .getBody();
+            .setSigningKey(secret)
+            .build()
+            .parseClaimsJws(token)
+            .getBody();
   }
 
 }

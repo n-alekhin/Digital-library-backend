@@ -20,11 +20,6 @@ public class UserMapperImpl {
       userDto.getRoles().add(Role.ADMIN);
     return userDto;
   }
-  public static User toUser(UserDto userDto) {
-    User user = new User();
-    user.setLogin(userDto.getLogin());
-    user.setPassword(userDto.getPassword());
-    return user;
-  }
+
 
 }

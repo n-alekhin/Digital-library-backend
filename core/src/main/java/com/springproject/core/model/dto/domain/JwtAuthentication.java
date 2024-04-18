@@ -2,10 +2,13 @@ package com.springproject.core.model.dto.domain;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Getter
 @Setter
@@ -18,17 +21,18 @@ public class JwtAuthentication implements Authentication {
   private Set<Role> roles;
   private Long id;
 
-  public Long getId() {
-    return id;
-  }
 
-  public void setId(Long id) {
-    this.id = id;
+  public void setAuthorities(Collection<? extends GrantedAuthority> a ){
+    roles = a.stream()
+            .map(authority -> (Role.valueOf(authority.getAuthority())))
+            .collect(Collectors.toSet());
   }
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return roles;
+    return roles.stream()
+            .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getAuthority()))
+            .collect(Collectors.toList());
   }
 
   @Override

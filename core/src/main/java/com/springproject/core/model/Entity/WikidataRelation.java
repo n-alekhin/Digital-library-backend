@@ -13,7 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class WikidataRelation {
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
   @Column(name = "word1_label")
   private String word1;
