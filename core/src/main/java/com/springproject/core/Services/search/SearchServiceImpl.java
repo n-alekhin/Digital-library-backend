@@ -109,14 +109,16 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public List<BookDTO> searchBookBool(BoolSearch query) {
-        Query query1 = new NativeQueryBuilder()
+        Query queryForElastic = new NativeQueryBuilder()
                 .withPageable(PageRequest.of(0, 20))
                 .withStoredFields(Collections.singletonList("id"))
+                /*.withQuery(q -> q
+                        .scriptScore(ssq -> ssq
+                                .query(innerQ -> innerQ.bool(b -> buildBoolQuery(b, query)))
+                                .script(s -> s.inline(inlineS -> inlineS.source("_score * 0.5")))
+                        )).build();*/
                 .withQuery(q -> q.bool(b -> buildBoolQuery(b, query))).build();
-        List<SearchHit<ElasticBook>> hits = operations.search(query1, ElasticBook.class).getSearchHits();
-        hits.forEach(h -> log.info(h.getId() + " " + h.getScore()));
-        List<Long> ids = hits.stream().map(h -> h.getContent().getId()).collect(Collectors.toList());
-        return getBooksByIds(ids);
+        return searchBooks(queryForElastic);
     }
 
 
@@ -126,15 +128,28 @@ public class SearchServiceImpl implements SearchService {
         query.setK(knnDTO.getK());
         query.setNumCandidates(knnDTO.getNumCandidates());
         query.setQuery_vector(vectorService.getVector(knnDTO.getQuery()));
+
         Query queryForElastic = new NativeQueryBuilder()
                 .withSearchType(null)
                 .withPageable(PageRequest.of(0, 20))
                 .withStoredFields(Collections.singletonList("id"))
                 .withKnnQuery(buildKnnQuery(query)).build();
+
+        return searchBooks(queryForElastic);
+    }
+    private List<BookDTO> searchBooks(Query queryForElastic) {
         List<SearchHit<ElasticBook>> hits = operations.search(queryForElastic, ElasticBook.class).getSearchHits();
         hits.forEach(h -> log.info(h.getId() + " " + h.getScore()));
         List<Long> ids = hits.stream().map(h -> h.getContent().getId()).collect(Collectors.toList());
         return getBooksByIds(ids);
+    }
+    @Override
+    public List<SearchHit<ElasticBook>> searchBookHitsKnn(KnnSearch query) {
+        Query queryForElastic = new NativeQueryBuilder()
+                .withSearchType(null)
+                .withStoredFields(Collections.singletonList("id"))
+                .withKnnQuery(buildKnnQuery(query)).build();
+        return operations.search(queryForElastic, ElasticBook.class).getSearchHits();
     }
 
     @Override
@@ -154,10 +169,8 @@ public class SearchServiceImpl implements SearchService {
                 .withStoredFields(Collections.singletonList("id"))
                 .withKnnQuery(buildKnnQuery(knnQuery, knnDTO.getBoost()))
                 .withQuery(q -> q.bool(b -> buildBoolQuery(b, boolQuery))).build();
-        List<SearchHit<ElasticBook>> hits = operations.search(queryForElastic, ElasticBook.class).getSearchHits();
-        hits.forEach(h -> log.info(h.getId() + " " + h.getScore()));
-        List<Long> ids = hits.stream().map(h -> h.getContent().getId()).collect(Collectors.toList());
-        return getBooksByIds(ids);
+
+        return searchBooks(queryForElastic);
     }
 
     @Override

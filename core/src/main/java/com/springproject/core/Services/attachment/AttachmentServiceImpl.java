@@ -1,5 +1,6 @@
 package com.springproject.core.Services.attachment;
 
+import com.springproject.core.Services.NotificationService;
 import com.springproject.core.Services.search.VectorService;
 import com.springproject.core.exceptions.BookNotFoundException;
 import com.springproject.core.exceptions.CoverNotFoundException;
@@ -40,7 +41,7 @@ public class AttachmentServiceImpl implements AttachmentService{
     private final ExtractEpubService extractEpubService;
     private final ModelMapper modelMapper;
     private final VectorService vectorService;
-
+    private final NotificationService notificationService;
     public void saveBookEpub(MultipartFile bookEpub, String uniqueString) {
         if (!constants.type.equals(bookEpub.getContentType())) {
             throw new InvalidBookTypeException("Invalid type of the file");
@@ -54,8 +55,8 @@ public class AttachmentServiceImpl implements AttachmentService{
             ElasticBook book = modelMapper.map(fullBook, ElasticBook.class);
             book.setId(bookId);
             book.getChapters().forEach(chapter -> chapter.setVector(vectorService.getVector(chapter.getContent())));
-
             elasticBookRepository.save(book);
+            notificationService.sendNotification(book.getChapters());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
