@@ -57,10 +57,9 @@ public class SecurityConfig {
       public void addCorsMappings(CorsRegistry registry) {
         registry
                 .addMapping("/**")
-                //.allowedOrigins(allowedOrigin)
-                .allowedOrigins("*")
-                .allowedMethods(CorsConfiguration.ALL);
-                //.allowCredentials(true);
+                .allowedOrigins(allowedOrigin)
+                .allowedMethods(CorsConfiguration.ALL)
+                .allowCredentials(true);
       }
     };
   }
