@@ -112,12 +112,11 @@ public class SearchServiceImpl implements SearchService {
         Query queryForElastic = new NativeQueryBuilder()
                 .withPageable(PageRequest.of(0, 20))
                 .withStoredFields(Collections.singletonList("id"))
-                /*.withQuery(q -> q
+                .withQuery(q -> q
                         .scriptScore(ssq -> ssq
                                 .query(innerQ -> innerQ.bool(b -> buildBoolQuery(b, query)))
-                                .script(s -> s.inline(inlineS -> inlineS.source("_score * 0.5")))
-                        )).build();*/
-                .withQuery(q -> q.bool(b -> buildBoolQuery(b, query))).build();
+                                .script(s -> s.inline(inlineS -> inlineS.source("_score * (1 + 0.1 * (Math.log10(1 + doc['reviews'].value)))")))
+                        )).build();
         return searchBooks(queryForElastic);
     }
 
@@ -133,6 +132,14 @@ public class SearchServiceImpl implements SearchService {
                 .withSearchType(null)
                 .withPageable(PageRequest.of(0, 20))
                 .withStoredFields(Collections.singletonList("id"))
+                .withQuery(q -> q
+                        .scriptScore(ssq -> ssq
+                                .query(innerQ -> innerQ.matchAll(ma -> ma))
+                                .script(s -> s.inline(inlineS ->
+                                        inlineS.source("0.02 * (Math.log10(1 + doc['reviews'].value))")
+                                        )
+                                )
+                        ))
                 .withKnnQuery(buildKnnQuery(query)).build();
 
         return searchBooks(queryForElastic);

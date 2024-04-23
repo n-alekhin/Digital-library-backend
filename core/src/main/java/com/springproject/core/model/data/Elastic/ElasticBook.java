@@ -23,5 +23,7 @@ public class ElasticBook {
     private List<String> authors;
     @Field(type = FieldType.Nested)
     private List<ElasticPartChapter> chapters;
+    @Field(type = FieldType.Integer)
+    private Integer reviews;
 
 }
