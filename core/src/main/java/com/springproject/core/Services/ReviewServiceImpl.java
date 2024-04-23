@@ -4,6 +4,7 @@ import com.springproject.core.Repository.BookRepository;
 import com.springproject.core.Repository.ReviewRepository;
 import com.springproject.core.Repository.UserRepository;
 import com.springproject.core.exceptions.BookNotFoundException;
+import com.springproject.core.exceptions.IsEmptyException;
 import com.springproject.core.model.Entity.Book;
 import com.springproject.core.model.Entity.Review;
 import com.springproject.core.model.Entity.User;
@@ -63,5 +64,18 @@ public class ReviewServiceImpl implements ReviewService{
             reviewDtoOutputs.add(reviewDtoOutput);
         }
         return reviewDtoOutputs;
+    }
+
+    public Double getMeanGrade(Long idBook) throws RuntimeException {
+        Book book = bookRepository.findById(idBook).orElse(null);
+        Double sumGrade = 0.0;
+        if (book.getReview().isEmpty()) {
+            throw new IsEmptyException("No reviews");
+        } else {
+            for(Review review : book.getReview()) {
+                sumGrade += review.getGrade();
+            }
+            return sumGrade / book.getReview().size();
+        }
     }
 }
