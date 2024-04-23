@@ -37,10 +37,13 @@ public class JwtFilter extends GenericFilterBean {
     final String token = getTokenFromRequest((HttpServletRequest) request);
     if (token != null && jwtProvider.validateAccessToken(token)) {
       final Claims claims = jwtProvider.getAccessClaims(token);
+      System.out.println(claims.getId());
       final JwtAuthentication jwtInfoToken = JwtUtils.generate(claims);
+      System.out.println(jwtInfoToken.getId());
       jwtInfoToken.setAuthenticated(true);
       jwtInfoToken.setAuthorities(userDetailsService.loadUserByUsername(jwtInfoToken.getUsername()).getAuthorities());
       SecurityContextHolder.getContext().setAuthentication(jwtInfoToken);
+      System.out.println(((JwtAuthentication) SecurityContextHolder.getContext().getAuthentication()).getId());
     }
     fc.doFilter(request, response);
   }

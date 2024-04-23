@@ -42,7 +42,7 @@ public class AttachmentServiceImpl implements AttachmentService{
     private final ModelMapper modelMapper;
     private final VectorService vectorService;
     private final NotificationService notificationService;
-    public void saveBookEpub(MultipartFile bookEpub, String uniqueString) {
+    public Long saveBookEpub(MultipartFile bookEpub, String uniqueString) {
         if (!constants.type.equals(bookEpub.getContentType())) {
             throw new InvalidBookTypeException("Invalid type of the file");
         }
@@ -57,6 +57,7 @@ public class AttachmentServiceImpl implements AttachmentService{
             book.getChapters().forEach(chapter -> chapter.setVector(vectorService.getVector(chapter.getContent())));
             elasticBookRepository.save(book);
             notificationService.sendNotification(book.getChapters());
+            return bookId;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
