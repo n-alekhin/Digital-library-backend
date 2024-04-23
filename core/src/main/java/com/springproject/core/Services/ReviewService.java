@@ -9,4 +9,5 @@ public interface ReviewService {
     Long createReview(ReviewDTO reviewDTO, Long idBook, Long idUser);
     List<ReviewDtoOutput> getReviewBook(Long idBook);
     List<ReviewDtoOutput> getReviewUser(Long idUser);
+    Double getMeanGrade(Long idBook) throws Exception;
 }
