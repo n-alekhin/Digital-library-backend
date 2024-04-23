@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
     }
     userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
     User user = mapper.map(userDto, User.class);
-    userRepository.save(user);
+    userDto.setId(userRepository.save(user).getId());
 
     Token token = new Token();
     token.setUser(user);

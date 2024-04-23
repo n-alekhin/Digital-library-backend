@@ -55,6 +55,7 @@ public class AuthService  {
   public JwtResponse reg(@NonNull UserDto userDto, User user) {
 
     //userDto.setRoles(new HashSet<>(Collections.singletonList(Role.valueOf(user.getRole()))));
+    System.out.println(userDto.getId());
     String accessToken = jwtProvider.generateAccessToken(userDto);
     String refreshToken = jwtProvider.generateRefreshToken(userDto);
     //revokeAllUserTokens(user);

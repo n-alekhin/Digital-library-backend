@@ -98,7 +98,7 @@ public class BookController {
     //@Operation(description = "В качестве тела form-data отправить файл")
     //@PostMapping(value = "/load", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PostMapping("/load")
-    public void loadBook(@RequestParam("book") MultipartFile bookEpub) throws SaveFileException {
+    public Long loadBook(@RequestParam("book") MultipartFile bookEpub) throws SaveFileException {
         if (bookEpub.isEmpty()) {
             throw new SaveFileException("File not found");
         }
@@ -107,7 +107,7 @@ public class BookController {
             id = authService.getAuthInfo().getId().toString();
         } catch (ClassCastException ignore) {
         }
-        attachmentService.saveBookEpub(bookEpub, id);
+        return attachmentService.saveBookEpub(bookEpub, id);
     }
 
     @ApiResponses(value = {

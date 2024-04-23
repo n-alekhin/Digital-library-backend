@@ -10,6 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +33,9 @@ public class User implements UserDetails {
   private String password;
   private String role;
 
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private List<Review> review = new ArrayList<>();
+
   private Boolean isBanned = false;
 
   @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
@@ -39,7 +43,7 @@ public class User implements UserDetails {
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + this.role));
+    return Collections.singletonList(new SimpleGrantedAuthority(role));
   }
 
   @Override

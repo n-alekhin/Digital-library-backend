@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
 
 
 @Entity
@@ -15,14 +13,16 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Book {
+public class Review {
     @Id
     @GeneratedValue
     private Long id;
-    private String fileName;
-    private String title;
-    private String authors;
+    private Integer grade;
+    private String comment;
 
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Review> review = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Book book;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User user;
 }
