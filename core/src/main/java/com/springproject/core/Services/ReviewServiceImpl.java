@@ -10,6 +10,7 @@ import com.springproject.core.model.Entity.Review;
 import com.springproject.core.model.Entity.User;
 import com.springproject.core.model.dto.ReviewDTO;
 import com.springproject.core.model.dto.ReviewDtoOutput;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +40,7 @@ public class ReviewServiceImpl implements ReviewService{
     }
 
     public List<ReviewDtoOutput> getReviewBook(Long idBook) {
-        Book book = bookRepository.findById(idBook).orElse(null);
+        Book book = bookRepository.findById(idBook).orElseThrow(() -> new EntityNotFoundException("Book not found"));
         List<ReviewDtoOutput> reviewDtoOutputs = new ArrayList<>();
         for (Review review : book.getReview()) {
             ReviewDtoOutput reviewDtoOutput = new ReviewDtoOutput();
@@ -53,7 +54,7 @@ public class ReviewServiceImpl implements ReviewService{
     }
 
     public List<ReviewDtoOutput> getReviewUser(Long idUser) {
-        User user = userRepository.findById(idUser).orElse(null);
+        User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException("User not found"));
         List<ReviewDtoOutput> reviewDtoOutputs = new ArrayList<>();
         for (Review review : user.getReview()) {
             ReviewDtoOutput reviewDtoOutput = new ReviewDtoOutput();
@@ -67,7 +68,7 @@ public class ReviewServiceImpl implements ReviewService{
     }
 
     public Double getMeanGrade(Long idBook) throws RuntimeException {
-        Book book = bookRepository.findById(idBook).orElse(null);
+        Book book = bookRepository.findById(idBook).orElseThrow(() -> new EntityNotFoundException("Book not found"));
         Double sumGrade = 0.0;
         if (book.getReview().isEmpty()) {
             throw new IsEmptyException("No reviews");
