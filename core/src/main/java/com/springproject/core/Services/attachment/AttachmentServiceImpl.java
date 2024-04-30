@@ -54,6 +54,7 @@ public class AttachmentServiceImpl implements AttachmentService{
 
             ElasticBook book = modelMapper.map(fullBook, ElasticBook.class);
             book.setId(bookId);
+            book.setReviews(0);
             book.getChapters().forEach(chapter -> chapter.setVector(vectorService.getVector(chapter.getContent())));
             elasticBookRepository.save(book);
             notificationService.sendNotification(book.getChapters());
