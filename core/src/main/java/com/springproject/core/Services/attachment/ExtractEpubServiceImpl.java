@@ -38,13 +38,20 @@ public class ExtractEpubServiceImpl implements ExtractEpubService{
 
         try {
             Book book = (new EpubReader()).readEpub(epubStream);
-            fullBookInfo.setTitle(book.getTitle());
+            if (book.getTitle() == null || book.getTitle().trim().equals(""))
+                fullBookInfo.setTitle("Unknown");
+            else
+                fullBookInfo.setTitle(book.getTitle());
             fullBookInfo.setPublisher(book.getMetadata().getPublishers().stream().findFirst().orElse(""));
 
             List<String> authors = book.getMetadata().getAuthors().stream()
                     .map(a -> a.getFirstname() + " " + a.getLastname())
                     .collect(Collectors.toList());
-            fullBookInfo.setAuthors(authors);
+            if (authors.isEmpty() || (authors.size() == 1 &&
+                    (authors.get(0) == null || authors.get(0).trim().equals(""))))
+                fullBookInfo.setAuthors(List.of("Unknown"));
+            else
+                fullBookInfo.setAuthors(authors);
 
             List<ElasticPartChapter> chaptersTmp = book.getSpine().getSpineReferences().stream()
                     .map(ref -> {
@@ -66,8 +73,10 @@ public class ExtractEpubServiceImpl implements ExtractEpubService{
                     fullBookInfo.setGenres(null);
                 }
             }
-
-            fullBookInfo.setLanguage(book.getMetadata().getLanguage());
+            if (book.getMetadata().getLanguage() == null || book.getMetadata().getLanguage().trim().equals(""))
+                fullBookInfo.setLanguage("Unknown");
+            else
+                fullBookInfo.setLanguage(book.getMetadata().getLanguage());
             String description = book.getMetadata().getDescriptions().stream().reduce((acc, s) -> acc.concat(". " + s)).orElse(null);
             if (description != null)
                 fullBookInfo.setDescription(Jsoup.parse(description).text());

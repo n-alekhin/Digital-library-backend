@@ -23,4 +23,5 @@ public class DetailedBookDTO {
     private String publisher;
     @Schema(example = "http://localhost:8080/book/cover/2")
     private String coverImageUrl;
+    private Long size;
 }
