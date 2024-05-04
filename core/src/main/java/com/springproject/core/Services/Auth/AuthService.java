@@ -49,7 +49,7 @@ public class AuthService  {
       Token token = user.getToken();
       token.setRefreshToken(refreshToken);
       userRepository.save(user);
-      return new JwtResponse(userDto.getId() ,accessToken, refreshToken);
+      return new JwtResponse(userDto.getId() ,accessToken, refreshToken, user.getRole());
   }
 
   public JwtResponse reg(@NonNull UserDto userDto, User user) {
@@ -62,7 +62,7 @@ public class AuthService  {
     Token token = user.getToken();
     token.setRefreshToken(refreshToken);
     userRepository.save(user);
-    return new JwtResponse(user.getId() ,accessToken, refreshToken);
+    return new JwtResponse(user.getId() ,accessToken, refreshToken, user.getRole());
   }
 
   public JwtResponse getAccessToken(@NonNull String refreshToken){
@@ -78,10 +78,10 @@ public class AuthService  {
       if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
         final UserDto userDto = UserMapperImpl.toUserDto(optionalUser.get());
         final String accessToken = jwtProvider.generateAccessToken(userDto);
-        return new JwtResponse(optionalUser.get().getId(), accessToken, null);
+        return new JwtResponse(optionalUser.get().getId(), accessToken, null,  optionalUser.get().getRole());
       }
     }
-    return new JwtResponse(null, null, null);
+    return new JwtResponse(null, null, null, null);
   }
 
 
@@ -101,7 +101,7 @@ public class AuthService  {
 
         token.setRefreshToken(newRefreshToken);
         userRepository.save(optionalUser.get());
-        return new JwtResponse(optionalUser.get().getId(), accessToken, newRefreshToken);
+        return new JwtResponse(optionalUser.get().getId(), accessToken, newRefreshToken, optionalUser.get().getRole());
       }
     }
 //    throw new LoginException("123");
