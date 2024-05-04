@@ -19,7 +19,8 @@ def my_function(text):
 def handle_request():
     data = request.get_json()  # Получение данных из тела запроса
     input_string = data.get('input', '') if data else ''
-    result = my_function(input_string)
+    #result = my_function(input_string)
+    result = [0] * 784
     return jsonify({'result': result})
 
 @app.route("/NLP", methods=["POST"])
