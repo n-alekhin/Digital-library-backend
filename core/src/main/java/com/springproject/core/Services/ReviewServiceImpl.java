@@ -78,7 +78,7 @@ public class ReviewServiceImpl implements ReviewService{
         Book book = bookRepository.findById(idBook).orElseThrow(() -> new EntityNotFoundException("Book not found"));
         Double sumGrade = 0.0;
         if (book.getReview().isEmpty()) {
-            throw new IsEmptyException("No reviews");
+            return -1.0;
         } else {
             for(Review review : book.getReview()) {
                 sumGrade += review.getGrade();

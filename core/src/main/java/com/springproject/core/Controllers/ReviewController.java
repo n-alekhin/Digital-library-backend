@@ -30,7 +30,6 @@ public class ReviewController {
     public List<ReviewDtoOutput> getReviewBook(
             @PathVariable Long idBook
     ) {
-        //String name = ((JwtAuthentication) SecurityContextHolder.getContext().getAuthentication()).getName();
         return reviewService.getReviewBook(idBook);
     }
 
@@ -38,7 +37,6 @@ public class ReviewController {
     public List<ReviewDtoOutput> getReviewUser(
             @PathVariable Long idUser
     ) {
-        //String name = ((JwtAuthentication) SecurityContextHolder.getContext().getAuthentication()).getName();
         return reviewService.getReviewUser(idUser);
     }
 
@@ -46,7 +44,6 @@ public class ReviewController {
     public Double getMeanGrade(
             @PathVariable Long idBook
     ) throws Exception {
-        //String name = ((JwtAuthentication) SecurityContextHolder.getContext().getAuthentication()).getName();
         return reviewService.getMeanGrade(idBook);
     }
 }
