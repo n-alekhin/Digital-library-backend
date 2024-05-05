@@ -38,7 +38,8 @@ services:
     build:
       context: .
     container_name: digital-library
-
+    volumes:
+      - ../client:/client
     depends_on:
       db:
         condition: service_started

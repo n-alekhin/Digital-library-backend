@@ -102,7 +102,7 @@ public class AttachmentServiceImpl implements AttachmentService{
     }
     public void saveBookForTesting(String fileName, InputStream fileInputStream, InputStream fileInputStreamForEpub, long size, String uniqueString) {
         fileName = uniqueString + "-" + fileName;
-                String root = System.getProperty("user.dir") + "\\";
+        String root = System.getProperty("user.dir") + "\\";
         String path = root + constants.storagePath + fileName;
         File file = new File(path);
         try (FileOutputStream outputStream = new FileOutputStream(file)) {
@@ -126,8 +126,12 @@ public class AttachmentServiceImpl implements AttachmentService{
 
     public Attachment getAttachment(Long fileId) throws BookNotFoundException {
         Book book = bookRepository.findById(fileId).orElseThrow(() -> new BookNotFoundException("Invalid id"));
-
-        try(InputStream inputStream = Files.newInputStream(Paths.get(constants.storagePath + book.getFileName()))) {
+        String root;
+        if (System.getProperty("user.dir").equals("/"))
+            root = "\\";
+        else
+            root = System.getProperty("user.dir") + "\\";
+        try(InputStream inputStream = Files.newInputStream(Paths.get(root + constants.storagePath + book.getFileName()))) {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];
             int length;
