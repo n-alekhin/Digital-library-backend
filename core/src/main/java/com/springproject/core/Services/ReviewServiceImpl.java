@@ -4,14 +4,13 @@ import com.springproject.core.Repository.BookRepository;
 import com.springproject.core.Repository.ElasticBookRepository;
 import com.springproject.core.Repository.ReviewRepository;
 import com.springproject.core.Repository.UserRepository;
-import com.springproject.core.exceptions.BookNotFoundException;
-import com.springproject.core.exceptions.IsEmptyException;
 import com.springproject.core.model.Entity.Book;
 import com.springproject.core.model.Entity.Review;
 import com.springproject.core.model.Entity.User;
 import com.springproject.core.model.data.Elastic.ElasticBook;
 import com.springproject.core.model.dto.ReviewDTO;
 import com.springproject.core.model.dto.ReviewDtoOutput;
+import com.springproject.core.model.dto.ShortUserDTO;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -45,33 +44,30 @@ public class ReviewServiceImpl implements ReviewService{
         elasticBookRepository.save(elasticBook);
         return review.getId();
     }
-
-    public List<ReviewDtoOutput> getReviewBook(Long idBook) {
-        Book book = bookRepository.findById(idBook).orElseThrow(() -> new EntityNotFoundException("Book not found"));
+    private List<ReviewDtoOutput> reviewsEntityToDTO(List<Review> reviews) {
         List<ReviewDtoOutput> reviewDtoOutputs = new ArrayList<>();
-        for (Review review : book.getReview()) {
+        for (Review review : reviews) {
             ReviewDtoOutput reviewDtoOutput = new ReviewDtoOutput();
             reviewDtoOutput.comment = review.getComment();
             reviewDtoOutput.grade = review.getGrade();
             reviewDtoOutput.idBook = review.getBook().getId();
-            reviewDtoOutput.idUser = review.getUser().getId();
+            reviewDtoOutput.user = new ShortUserDTO();
+            reviewDtoOutput.user.setId(review.getUser().getId());
+            reviewDtoOutput.user.setName(review.getUser().getName());
+            reviewDtoOutput.user.setLogin(review.getUser().getLogin());
             reviewDtoOutputs.add(reviewDtoOutput);
         }
         return reviewDtoOutputs;
     }
 
+    public List<ReviewDtoOutput> getReviewBook(Long idBook) {
+        Book book = bookRepository.findById(idBook).orElseThrow(() -> new EntityNotFoundException("Book not found"));
+        return reviewsEntityToDTO(book.getReview());
+    }
+
     public List<ReviewDtoOutput> getReviewUser(Long idUser) {
         User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException("User not found"));
-        List<ReviewDtoOutput> reviewDtoOutputs = new ArrayList<>();
-        for (Review review : user.getReview()) {
-            ReviewDtoOutput reviewDtoOutput = new ReviewDtoOutput();
-            reviewDtoOutput.comment = review.getComment();
-            reviewDtoOutput.grade = review.getGrade();
-            reviewDtoOutput.idBook = review.getBook().getId();
-            reviewDtoOutput.idUser = review.getUser().getId();
-            reviewDtoOutputs.add(reviewDtoOutput);
-        }
-        return reviewDtoOutputs;
+        return reviewsEntityToDTO(user.getReview());
     }
 
     public Double getMeanGrade(Long idBook) throws RuntimeException {

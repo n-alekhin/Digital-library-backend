@@ -9,5 +9,5 @@ public class ReviewDtoOutput {
     public Integer grade;
     public String comment;
     public Long idBook;
-    public Long idUser;
+    public ShortUserDTO user;
 }
