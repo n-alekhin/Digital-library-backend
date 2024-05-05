@@ -33,14 +33,14 @@ public class AuthService  {
   private final AuthenticationManager authenticationManager;
   public JwtResponse login(@NonNull JwtRequest authRequest) {
     //провеки
+    User user = userRepository.getByLogin(authRequest.getLogin())
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(
             authRequest.getLogin(),
             authRequest.getPassword()
         )
     );
-    User user = userRepository.getByLogin(authRequest.getLogin())
-        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     UserDto userDto = mapper.map(user, UserDto.class);
     userDto.setRoles(new HashSet<>(Collections.singletonList(Role.valueOf(user.getRole()))));
     String accessToken = jwtProvider.generateAccessToken(userDto);
