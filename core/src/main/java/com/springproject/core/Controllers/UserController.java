@@ -1,5 +1,6 @@
 package com.springproject.core.Controllers;
 
+import com.springproject.core.Services.EmailService;
 import com.springproject.core.Services.UserService;
 import com.springproject.core.model.dto.UserDto;
 import com.springproject.core.model.dto.UserDtoResponse;
@@ -19,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/user")
 public class UserController {
 
+
+    private final EmailService emailService;
     private final UserService userService;
 
     @GetMapping("getUser")
@@ -75,9 +78,11 @@ public class UserController {
 
     @GetMapping("/test2")
     @PreAuthorize("hasRole('USER')")
-    public void test2() {
-        System.out.println(((JwtAuthentication) SecurityContextHolder.getContext().getAuthentication()).getAuthorities());
-        System.out.println(SecurityContextHolder.getContext().getAuthentication());
-        // System.out.println(((JwtAuthentication) SecurityContextHolder.getContext().getAuthentication()). );
+    public ResponseEntity<String> test2() {
+        String[] recipients = {"n.alekhin@g.nsu.ru","e.pashko@g.nsu.ru"};
+        System.out.println("321");
+        emailService.sendEmail(recipients, "Welcome!", "This is a test email from our Spring Boot application.");
+        System.out.println("321");
+        return ResponseEntity.ok("Email sent successfully");
     }
 }
