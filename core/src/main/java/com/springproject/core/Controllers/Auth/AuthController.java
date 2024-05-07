@@ -6,10 +6,7 @@ import com.springproject.core.model.dto.domain.JwtResponse;
 import com.springproject.core.model.dto.domain.RefreshJwtRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/auth")
@@ -34,6 +31,13 @@ public class AuthController {
   public ResponseEntity<JwtResponse> getNewRefreshToken(@RequestBody RefreshJwtRequest request) {
     final JwtResponse token = authService.refresh(request.getRefreshToken());
     return ResponseEntity.ok(token);
+  }
+
+  @GetMapping("verify")
+  public JwtResponse verifyEmail(
+          @RequestParam String token
+  ) {
+    return authService.verify(token);
   }
 
 }

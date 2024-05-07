@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -44,6 +45,21 @@ public class ReviewServiceImpl implements ReviewService{
         elasticBookRepository.save(elasticBook);
         return review.getId();
     }
+
+    @Override
+    public List<ReviewDtoOutput> getReviewBook(Long idBook, int size, int page) {
+        if (size <= 0 || page < 0)
+            return Collections.emptyList();
+        Book book = bookRepository.findById(idBook).orElseThrow(() -> new EntityNotFoundException("Book not found"));
+        int reviewsSize = book.getReview().size();
+        if (size * (page + 1) > reviewsSize) {
+            if (size * page > reviewsSize)
+                return Collections.emptyList();
+            return reviewsEntityToDTO(book.getReview().subList(size * page, reviewsSize));
+        }
+        return reviewsEntityToDTO(book.getReview().subList(size * page, size * (page + 1)));
+    }
+
     private List<ReviewDtoOutput> reviewsEntityToDTO(List<Review> reviews) {
         List<ReviewDtoOutput> reviewDtoOutputs = new ArrayList<>();
         for (Review review : reviews) {
@@ -60,10 +76,6 @@ public class ReviewServiceImpl implements ReviewService{
         return reviewDtoOutputs;
     }
 
-    public List<ReviewDtoOutput> getReviewBook(Long idBook) {
-        Book book = bookRepository.findById(idBook).orElseThrow(() -> new EntityNotFoundException("Book not found"));
-        return reviewsEntityToDTO(book.getReview());
-    }
 
     public List<ReviewDtoOutput> getReviewUser(Long idUser) {
         User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException("User not found"));

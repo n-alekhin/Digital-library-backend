@@ -28,9 +28,11 @@ public class ReviewController {
 
     @GetMapping("/getBook/{idBook}")
     public List<ReviewDtoOutput> getReviewBook(
-            @PathVariable Long idBook
+            @PathVariable Long idBook,
+            @RequestParam Integer size,
+            @RequestParam Integer page
     ) {
-        return reviewService.getReviewBook(idBook);
+        return reviewService.getReviewBook(idBook, size, page);
     }
 
     @GetMapping("/getUser/{idUser}")

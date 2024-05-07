@@ -5,8 +5,7 @@ import com.springproject.core.Services.UserService;
 import com.springproject.core.model.dto.UserDto;
 import com.springproject.core.model.dto.UserDtoResponse;
 import com.springproject.core.model.dto.domain.JwtAuthentication;
-import com.springproject.core.model.dto.domain.JwtRequest;
-import com.springproject.core.model.dto.domain.JwtResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -30,18 +29,21 @@ public class UserController {
     }
 
     @PostMapping("/reg")
-    public ResponseEntity<JwtResponse> create(@RequestBody UserDto userDto) {
-        return ResponseEntity.ok(userService.createUser(userDto, 0));
+    public ResponseEntity<?> create(@Valid @RequestBody UserDto userDto) {
+        userService.createUser(userDto, 0);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/regAdmin")
-    public ResponseEntity<JwtResponse> createAdmin(@RequestBody UserDto userDto) {
-        return ResponseEntity.ok(userService.createUser(userDto, 1));
+    public ResponseEntity<?> createAdmin(@Valid @RequestBody UserDto userDto) {
+        userService.createUser(userDto, 1);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/regAdminS")
-    public ResponseEntity<JwtResponse> createAdminS(@RequestBody UserDto userDto) {
-        return ResponseEntity.ok(userService.createUser(userDto, 2));
+    public ResponseEntity<?> createAdminS(@Valid @RequestBody UserDto userDto) {
+        userService.createUser(userDto, 2);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/banAdmin")

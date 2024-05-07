@@ -1,49 +1,48 @@
 package com.springproject.core.Services;
 
-import com.springproject.core.Services.Auth.AuthService;
+import com.springproject.core.Repository.VerificationTokenRepository;
+import com.springproject.core.Services.Auth.JwtProvider;
 import com.springproject.core.exceptions.InvalidAuthException;
 import com.springproject.core.model.Entity.Token;
 import com.springproject.core.model.Entity.User;
 import com.springproject.core.Repository.UserRepository;
+import com.springproject.core.model.Entity.VerificationToken;
 import com.springproject.core.model.dto.UserDto;
 import com.springproject.core.model.dto.UserDtoResponse;
-import com.springproject.core.model.dto.domain.JwtResponse;
 import com.springproject.core.model.dto.domain.Role;
 import jakarta.persistence.EntityNotFoundException;
-import org.hibernate.annotations.NotFound;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
   private final ModelMapper mapper;
   private final PasswordEncoder passwordEncoder;
-  private final AuthService authService;
+  private final JwtProvider jwtProvider;
+  private final VerificationTokenRepository verificationTokenRepository;
 
-  public UserServiceImpl(UserRepository userRepository, ModelMapper mapper, PasswordEncoder passwordEncoder, AuthService authService) {
+  public UserServiceImpl(UserRepository userRepository, ModelMapper mapper, PasswordEncoder passwordEncoder, JwtProvider jwtProvider, VerificationTokenRepository verificationTokenRepository) {
     this.userRepository = userRepository;
     this.mapper = mapper;
     this.passwordEncoder = passwordEncoder;
-      this.authService = authService;
+    this.jwtProvider = jwtProvider;
+    this.verificationTokenRepository = verificationTokenRepository;
   }
 
-  public JwtResponse createUser(UserDto userDto, int role) {
-    if(userRepository.getByLogin(userDto.getLogin()).isPresent()){
+  public void createUser(UserDto userDto, int role) {
+    Optional<User> userInDB = userRepository.getByLogin(userDto.getLogin());
+    if (userInDB.isPresent() && userInDB.get().getIsConfirmed()){
       throw new InvalidAuthException("Логин занят");
     }
     userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
     User user = mapper.map(userDto, User.class);
-    userDto.setId(userRepository.save(user).getId());
-
-    Token token = new Token();
-    token.setUser(user);
-    user.setToken(token);
-
+    user.setIsConfirmed(false);
     if (role == 1 )
       user.setRole(Role.ADMIN.getAuthority());
     if (role == 0 )
@@ -51,7 +50,16 @@ public class UserServiceImpl implements UserService {
     if (role == 2 )
       user.setRole(Role.SUPER_ADMIN.getAuthority());
 
-    return authService.reg(userDto, user);
+    Token userToken = new Token();
+    userToken.setUser(user);
+    user.setToken(userToken);
+
+    String token = jwtProvider.generateRefreshToken(userDto);
+    VerificationToken verificationToken = new VerificationToken();
+    verificationToken.setToken(token);
+    verificationToken.setUser(userRepository.save(user));
+    verificationTokenRepository.save(verificationToken);
+    System.out.println("Verification: " + token);
   }
 
   @Override

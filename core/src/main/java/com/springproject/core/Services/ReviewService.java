@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ReviewService {
     Long createReview(ReviewDTO reviewDTO, Long idBook, Long idUser);
-    List<ReviewDtoOutput> getReviewBook(Long idBook);
+    List<ReviewDtoOutput> getReviewBook(Long idBook, int size, int page);
     List<ReviewDtoOutput> getReviewUser(Long idUser);
     Double getMeanGrade(Long idBook) throws Exception;
 }

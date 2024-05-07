@@ -33,6 +33,12 @@ public class User implements UserDetails {
   private String password;
   private String role;
 
+  private Boolean isSendNotification;
+  private Boolean isConfirmed;
+  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+  @PrimaryKeyJoinColumn
+  private VerificationToken address;
+
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<Review> review = new ArrayList<>();
 
