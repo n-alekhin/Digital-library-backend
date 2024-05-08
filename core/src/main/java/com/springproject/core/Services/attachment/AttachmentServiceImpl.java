@@ -60,7 +60,7 @@ public class AttachmentServiceImpl implements AttachmentService{
             notificationService.sendNotification(book.getChapters());
             return bookId;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new SaveFileException("Something went wrong while saving the book");
         }
     }
 
@@ -125,7 +125,7 @@ public class AttachmentServiceImpl implements AttachmentService{
 
 
     public Attachment getAttachment(Long fileId) throws BookNotFoundException {
-        Book book = bookRepository.findById(fileId).orElseThrow(() -> new BookNotFoundException("Invalid id"));
+        Book book = bookRepository.findById(fileId).orElseThrow(() -> new BookNotFoundException("Invalid book id"));
         String root;
         if (System.getProperty("user.dir").equals("/"))
             root = "\\";
@@ -141,7 +141,7 @@ public class AttachmentServiceImpl implements AttachmentService{
             byte[] bytes = outputStream.toByteArray();
             return new Attachment(book.getFileName(), bytes);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new BookNotFoundException("Something went wrong while receiving the book");
         }
     }
 

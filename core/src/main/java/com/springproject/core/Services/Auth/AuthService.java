@@ -37,7 +37,6 @@ public class AuthService {
     private final VerificationTokenRepository verificationTokenRepository;
 
     public JwtResponse login(@NonNull JwtRequest authRequest) {
-        //провеки
         User user = userRepository.getByLogin(authRequest.getLogin())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         /*TODO
@@ -57,7 +56,6 @@ public class AuthService {
         UserDto userDto = mapper.map(user, UserDto.class);
         String accessToken = jwtProvider.generateAccessToken(userDto);
         String refreshToken = jwtProvider.generateRefreshToken(userDto);
-        //revokeAllUserTokens(user);
         Token token = user.getToken();
         token.setRefreshToken(refreshToken);
         userRepository.save(user);
@@ -71,9 +69,7 @@ public class AuthService {
             final String login = claims.getSubject();
 
             Optional<User> optionalUser = userRepository.getByLogin(login);
-//      if (!optionalUser.isPresent()) {
-//        throw new AuthException();
-//      }
+
             final String saveRefreshToken = optionalUser.get().getToken().getRefreshToken();
             if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
                 final UserDto userDto = UserMapperImpl.toUserDto(optionalUser.get());
@@ -90,8 +86,7 @@ public class AuthService {
             final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
             final String login = claims.getSubject();
             Optional<User> optionalUser = userRepository.getByLogin(login);
-//      if (!optionalUser.isPresent())
-//        throw new AuthException();
+
             String saveRefreshToken = optionalUser.get().getToken().getRefreshToken();
             if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
                 final UserDto userDto = UserMapperImpl.toUserDto(optionalUser.get());

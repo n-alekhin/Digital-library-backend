@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
   public void createUser(UserDto userDto, int role) {
     Optional<User> userInDB = userRepository.getByLogin(userDto.getLogin());
     if (userInDB.isPresent() && userInDB.get().getIsConfirmed()){
-      throw new InvalidAuthException("Логин занят");
+      throw new InvalidAuthException("The login is already taken");
     }
     userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
     User user = mapper.map(userDto, User.class);
@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
     User user = userRepository.findById(userId)
             .orElseThrow(() -> new EntityNotFoundException("User with ID " + userId + " not found"));
     if (!Objects.equals(user.getRole(), Role.USER.getAuthority())) {
-      throw new AccessDeniedException("У Пользователя нет разрешения на выполнение этого действия");
+      throw new AccessDeniedException("The user does not have permission to perform this action");
     }
     user.setIsBanned(true);
     return userRepository.save(user).getId();
@@ -86,7 +86,7 @@ public class UserServiceImpl implements UserService {
     User user = userRepository.findById(userId)
             .orElseThrow(() -> new EntityNotFoundException("User with ID " + userId + " not found"));
     if (Objects.equals(user.getRole(), Role.SUPER_ADMIN.getAuthority())) {
-      throw new AccessDeniedException("У Пользователя нет разрешения на выполнение этого действия");
+      throw new AccessDeniedException("The user does not have permission to perform this action");
     }
     user.setRole(Role.ADMIN.getAuthority());
     return userRepository.save(user).getId();
@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService {
     User user = userRepository.findById(userId)
             .orElseThrow(() -> new EntityNotFoundException("User with ID " + userId + " not found"));
     if (Objects.equals(user.getRole(), Role.SUPER_ADMIN.getAuthority())) {
-      throw new AccessDeniedException("У Пользователя нет разрешения на выполнение этого действия");
+      throw new AccessDeniedException("The user does not have permission to perform this action");
     }
     user.setRole(Role.USER.getAuthority());
     return userRepository.save(user).getId();

@@ -23,10 +23,10 @@ public class SecurityServiceImpl implements SecurityService{
                 .orElseThrow(() -> new EntityNotFoundException("User with ID " + userId + " not found"));
         String role = user.getRole();
         if (user.getIsBanned()){
-            throw new AccessDeniedException("Пользователь забанен");
+            throw new AccessDeniedException("The user is banned");
         }
         if ( (!Objects.equals(role, Role.ADMIN.name())  && (!Objects.equals(role, Role.SUPER_ADMIN.name())))){
-            throw new AccessDeniedException("У Пользователя нет разрешения на выполнение этого действия");
+            throw new AccessDeniedException("The user does not have permission to perform this action");
         }
         return null;
     }
@@ -37,10 +37,10 @@ public class SecurityServiceImpl implements SecurityService{
                 .orElseThrow(() -> new EntityNotFoundException("User with ID " + userId + " not found"));
         String role = user.getRole();
         if (user.getIsBanned()){
-            throw new AccessDeniedException("Пользователь забанен");
+            throw new AccessDeniedException("The user is banned");
         }
         if ( !Objects.equals(role, Role.SUPER_ADMIN.name())){
-            throw new AccessDeniedException("У Пользователя нет разрешения на выполнение этого действия");
+            throw new AccessDeniedException("The user does not have permission to perform this action");
         }
         return null;
     }
@@ -50,7 +50,7 @@ public class SecurityServiceImpl implements SecurityService{
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User with ID " + userId + " not found"));
         if (user.getIsBanned()){
-            throw new AccessDeniedException("Пользователь забанен");
+            throw new AccessDeniedException("The user is banned");
         }
         return null;
     }
