@@ -2,6 +2,7 @@ package com.springproject.core.Services.search;
 
 import co.elastic.clients.elasticsearch._types.KnnQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.json.JsonData;
 import com.springproject.core.Repository.BookRepository;
 import com.springproject.core.model.dto.BookDTO;
 import com.springproject.core.model.data.Constants;
@@ -55,18 +56,29 @@ public class SearchServiceImpl implements SearchService {
 
                             )
                     )));
-            System.out.println(query.getMust().get("chapters.content"));
             query.getMust().remove("chapters.content");
         }
         queries.addAll(query.getMust().keySet().stream().filter(k ->
-                !query.getMust().get(k).getQuery().isEmpty()).map(key ->
-                co.elastic.clients.elasticsearch._types.query_dsl.Query
-                        .of(innerQ -> innerQ.match(m -> m.field(key)
-                                .query(query.getMust().get(key).getQuery())
-                                .operator(query.getMust().get(key).getOperator())
-                                .fuzziness(query.getMust().get(key).getFuzzy())
-                        ))
-        ).toList());
+                        !query.getMust().get(k).getQuery().isEmpty()).map(key ->
+                        co.elastic.clients.elasticsearch._types.query_dsl.Query
+                                .of(innerQ -> innerQ.match(m -> m.field(key)
+                                        .query(query.getMust().get(key).getQuery())
+                                        .query(fn -> fn.anyValue(JsonData.of(List.of("d"))))
+                                        .operator(query.getMust().get(key).getOperator())
+                                        .fuzziness(query.getMust().get(key).getFuzzy())
+                                ))
+                ).toList()
+        );
+        if (query.getAuthors() != null && !query.getAuthors().isEmpty()){
+            String authors = query.getAuthors().toString();
+            queries.add(co.elastic.clients.elasticsearch._types.query_dsl.Query
+                    .of(innerQ -> innerQ.match(m -> {
+                                m.field("authors");
+                                m.query(authors.substring(1, authors.length() - 1));
+                                return m;
+                            }
+                    )));
+        }
         if (query.getMust() != null && !queries.isEmpty()) {
             b.must(queries);
         }
@@ -91,6 +103,7 @@ public class SearchServiceImpl implements SearchService {
                 .numCandidates(query.getNumCandidates())
                 .queryVector(query.getQuery_vector()));
     }
+
     private KnnQuery buildKnnQuery(KnnSearch query) {
         return KnnQuery.of(q -> q
                 .field(query.getField())
@@ -98,12 +111,13 @@ public class SearchServiceImpl implements SearchService {
                 .numCandidates(query.getNumCandidates())
                 .queryVector(query.getQuery_vector()));
     }
+
     private List<BookDTO> getBooksByIds(List<Long> ids) {
         return bookRepository.findAllById(ids).stream().map(b -> {
-            BookDTO book = modelMapper.map(b, BookDTO.class);
-            book.setCoverImageUrl(constants.getImagePath() + b.getId());
-            return book;
-        }).sorted(Comparator.comparingInt(book -> ids.indexOf(book.getId())))
+                    BookDTO book = modelMapper.map(b, BookDTO.class);
+                    book.setCoverImageUrl(constants.getImagePath() + b.getId());
+                    return book;
+                }).sorted(Comparator.comparingInt(book -> ids.indexOf(book.getId())))
                 .toList();
     }
 
@@ -114,6 +128,7 @@ public class SearchServiceImpl implements SearchService {
                 .withStoredFields(Collections.singletonList("id"))
                 .withQuery(q -> q
                         .scriptScore(ssq -> ssq
+
                                 .query(innerQ -> innerQ.bool(b -> buildBoolQuery(b, query)))
                                 .script(s -> s.inline(inlineS -> inlineS.source("_score * (1 + 0.1 * (Math.log10(1 + doc['reviews'].value)))")))
                         )).build();
@@ -136,7 +151,7 @@ public class SearchServiceImpl implements SearchService {
                         .scriptScore(ssq -> ssq
                                 .query(innerQ -> innerQ.matchAll(ma -> ma))
                                 .script(s -> s.inline(inlineS ->
-                                        inlineS.source("0.02 * (Math.log10(1 + doc['reviews'].value))")
+                                                inlineS.source("0.02 * (Math.log10(1 + doc['reviews'].value))")
                                         )
                                 )
                         ))
@@ -144,12 +159,14 @@ public class SearchServiceImpl implements SearchService {
 
         return searchBooks(queryForElastic);
     }
+
     private List<BookDTO> searchBooks(Query queryForElastic) {
         List<SearchHit<ElasticBook>> hits = operations.search(queryForElastic, ElasticBook.class).getSearchHits();
         hits.forEach(h -> log.info(h.getId() + " " + h.getScore()));
         List<Long> ids = hits.stream().map(h -> h.getContent().getId()).collect(Collectors.toList());
         return getBooksByIds(ids);
     }
+
     @Override
     public List<SearchHit<ElasticBook>> searchBookHitsKnn(KnnSearch query) {
         Query queryForElastic = new NativeQueryBuilder()
@@ -182,7 +199,7 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public List<BookDTO> wikidataSearch(WikidataSearchDTO wikidataSearchDTO) {
-        BoolSearch boolSearch =  new BoolSearch();
+        BoolSearch boolSearch = new BoolSearch();
         ElasticBoolQuery searchByContent = new ElasticBoolQuery();
         searchByContent.setQuery(wikidataService.enrichWithWikidata(wikidataSearchDTO.getQuery()));
         Map<String, ElasticBoolQuery> map = new HashMap<>();
