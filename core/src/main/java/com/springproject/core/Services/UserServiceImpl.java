@@ -12,6 +12,7 @@ import com.springproject.core.model.dto.UserDtoResponse;
 import com.springproject.core.model.dto.domain.Role;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,13 +27,18 @@ public class UserServiceImpl implements UserService {
   private final PasswordEncoder passwordEncoder;
   private final JwtProvider jwtProvider;
   private final VerificationTokenRepository verificationTokenRepository;
-
-  public UserServiceImpl(UserRepository userRepository, ModelMapper mapper, PasswordEncoder passwordEncoder, JwtProvider jwtProvider, VerificationTokenRepository verificationTokenRepository) {
+  private final EmailService emailService;
+  @Value("${application.client-host}")
+  private String clientHost;
+  @Value("${application.enable-verify}")
+  private Boolean isVerify;
+  public UserServiceImpl(UserRepository userRepository, ModelMapper mapper, PasswordEncoder passwordEncoder, JwtProvider jwtProvider, VerificationTokenRepository verificationTokenRepository, EmailService emailService) {
     this.userRepository = userRepository;
     this.mapper = mapper;
     this.passwordEncoder = passwordEncoder;
     this.jwtProvider = jwtProvider;
     this.verificationTokenRepository = verificationTokenRepository;
+    this.emailService = emailService;
   }
 
   public void createUser(UserDto userDto, int role) {
@@ -59,6 +65,10 @@ public class UserServiceImpl implements UserService {
     verificationToken.setToken(token);
     verificationToken.setUser(userRepository.save(user));
     verificationTokenRepository.save(verificationToken);
+    if (isVerify) {
+      emailService.sendEmail(new String[]{userDto.getLogin()}, "Verification",
+              "Please verify your email " + clientHost + "/api/auth/verify?token="+token);
+    }
     System.out.println("Verification: " + token);
   }
 

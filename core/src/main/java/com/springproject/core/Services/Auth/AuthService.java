@@ -1,6 +1,7 @@
 package com.springproject.core.Services.Auth;
 
 import com.springproject.core.Repository.VerificationTokenRepository;
+import com.springproject.core.exceptions.InvalidAuthException;
 import com.springproject.core.model.Entity.Token;
 import com.springproject.core.model.Entity.User;
 import com.springproject.core.Mapper.UserMapperImpl;
@@ -19,6 +20,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,13 +37,16 @@ public class AuthService {
     private final ModelMapper mapper;
     private final AuthenticationManager authenticationManager;
     private final VerificationTokenRepository verificationTokenRepository;
+    @Value("${application.enable-verify}")
+    private Boolean isVerify;
 
     public JwtResponse login(@NonNull JwtRequest authRequest) {
         User user = userRepository.getByLogin(authRequest.getLogin())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        /*TODO
-        if (!user.getIsConfirmed())
-            throw new InvalidAuthException("Email is not confirmed");*/
+        if (isVerify) {
+            if (!user.getIsConfirmed())
+                throw new InvalidAuthException("Email is not confirmed");
+        }
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         authRequest.getLogin(),
