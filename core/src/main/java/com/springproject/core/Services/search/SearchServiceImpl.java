@@ -63,12 +63,13 @@ public class SearchServiceImpl implements SearchService {
                         co.elastic.clients.elasticsearch._types.query_dsl.Query
                                 .of(innerQ -> innerQ.match(m -> m.field(key)
                                         .query(query.getMust().get(key).getQuery())
-                                        .query(fn -> fn.anyValue(JsonData.of(List.of("d"))))
                                         .operator(query.getMust().get(key).getOperator())
                                         .fuzziness(query.getMust().get(key).getFuzzy())
                                 ))
                 ).toList()
         );
+        query.setAuthors(query.getAuthors().stream()
+                .filter(a -> !a.trim().isEmpty()).collect(Collectors.toList()));
         if (query.getAuthors() != null && !query.getAuthors().isEmpty()){
             String authors = query.getAuthors().toString();
             queries.add(co.elastic.clients.elasticsearch._types.query_dsl.Query

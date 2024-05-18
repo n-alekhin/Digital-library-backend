@@ -46,6 +46,9 @@ public class UserServiceImpl implements UserService {
     if (userInDB.isPresent() && userInDB.get().getIsConfirmed()){
       throw new InvalidAuthException("The login is already taken");
     }
+    if (userInDB.isPresent() && !userInDB.get().getIsConfirmed()) {
+      userDto.setId(userDto.getId());
+    }
     userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
     User user = mapper.map(userDto, User.class);
     user.setIsConfirmed(false);
