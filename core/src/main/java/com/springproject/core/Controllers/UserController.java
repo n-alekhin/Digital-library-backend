@@ -1,7 +1,9 @@
 package com.springproject.core.Controllers;
 
+import com.springproject.core.Services.Auth.AuthService;
 import com.springproject.core.Services.EmailService;
 import com.springproject.core.Services.UserService;
+import com.springproject.core.model.dto.ChangeNotificationPolicyDTO;
 import com.springproject.core.model.dto.UserDto;
 import com.springproject.core.model.dto.UserDtoResponse;
 import com.springproject.core.model.dto.domain.JwtAuthentication;
@@ -22,6 +24,7 @@ public class UserController {
 
     private final EmailService emailService;
     private final UserService userService;
+    private final AuthService authService;
 
     @GetMapping("getUser")
     public ResponseEntity<UserDtoResponse> getUser(@RequestParam Long userId) {
@@ -68,6 +71,11 @@ public class UserController {
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<Long> revokeAdminRights(@RequestParam Long userId) {
         return ResponseEntity.ok(userService.revokeAdminRights(userId));
+    }
+    @PostMapping("/notification")
+    public void changeNotificationPolicy(@RequestBody ChangeNotificationPolicyDTO changeNotificationPolicyDTO) {
+        userService.changeNotificationPolicy(authService.getAuthInfo().getId(),
+                changeNotificationPolicyDTO.isSendNotification());
     }
 
     @GetMapping("/test")

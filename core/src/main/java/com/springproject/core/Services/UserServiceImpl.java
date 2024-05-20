@@ -46,11 +46,17 @@ public class UserServiceImpl implements UserService {
     if (userInDB.isPresent() && userInDB.get().getIsConfirmed()){
       throw new InvalidAuthException("The login is already taken");
     }
-    if (userInDB.isPresent() && !userInDB.get().getIsConfirmed()) {
-      userDto.setId(userDto.getId());
+    if (userInDB.isPresent()) {
+      userRepository.delete(userInDB.get());
+      /*user = userInDB.get();
+      long id = userInDB.get().getId();
+      mapper.map(userDto, user);
+      user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+      user.setId(id);*/
     }
     userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
     User user = mapper.map(userDto, User.class);
+
     user.setIsConfirmed(false);
     if (role == 1 )
       user.setRole(Role.ADMIN.getAuthority());
@@ -65,6 +71,7 @@ public class UserServiceImpl implements UserService {
 
     String token = jwtProvider.generateRefreshToken(userDto);
     VerificationToken verificationToken = new VerificationToken();
+
     verificationToken.setToken(token);
     verificationToken.setUser(userRepository.save(user));
     verificationTokenRepository.save(verificationToken);
@@ -122,5 +129,14 @@ public class UserServiceImpl implements UserService {
             .orElseThrow(() -> new EntityNotFoundException("User with ID " + userId + " not found"));
     return new UserDtoResponse(user.getName(), user.getRole());
   }
+
+  @Override
+  public void changeNotificationPolicy(Long userId, boolean isSend) {
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("User with ID " + userId + " not found"));
+    user.setIsSendNotification(isSend);
+    userRepository.save(user);
+  }
+
 
 }

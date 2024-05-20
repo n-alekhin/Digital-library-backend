@@ -11,5 +11,6 @@ public interface UserService {
   Long grantAdminRights(Long userId);
   Long revokeAdminRights(Long userId);
   UserDtoResponse getUser(Long userId);
+  void changeNotificationPolicy(Long userId, boolean isSend);
 
 }
