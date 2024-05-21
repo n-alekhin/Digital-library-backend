@@ -8,5 +8,5 @@ import org.springframework.web.multipart.MultipartFile;
 public interface AttachmentService {
     Attachment getAttachment(Long fileId) throws BookNotFoundException;
     CoverImage getCover(Long bookId);
-    Long saveBookEpub(MultipartFile bookEpub, String uniqueString);
+    Long saveBookEpub(MultipartFile bookEpub, Long userId);
 }

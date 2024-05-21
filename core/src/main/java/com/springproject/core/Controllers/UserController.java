@@ -73,9 +73,9 @@ public class UserController {
         return ResponseEntity.ok(userService.revokeAdminRights(userId));
     }
     @PostMapping("/notification")
-    public void changeNotificationPolicy(@RequestBody ChangeNotificationPolicyDTO changeNotificationPolicyDTO) {
+    public void changeNotificationPolicy(@Valid @RequestBody ChangeNotificationPolicyDTO changeNotificationPolicyDTO) {
         userService.changeNotificationPolicy(authService.getAuthInfo().getId(),
-                changeNotificationPolicyDTO.isSendNotification());
+                changeNotificationPolicyDTO.getIsSendNotification());
     }
 
     @GetMapping("/test")

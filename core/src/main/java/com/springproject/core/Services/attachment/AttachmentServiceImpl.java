@@ -42,11 +42,11 @@ public class AttachmentServiceImpl implements AttachmentService{
     private final ModelMapper modelMapper;
     private final VectorService vectorService;
     private final NotificationService notificationService;
-    public Long saveBookEpub(MultipartFile bookEpub, String uniqueString) {
+    public Long saveBookEpub(MultipartFile bookEpub, Long userId) {
         if (!constants.type.equals(bookEpub.getContentType())) {
             throw new InvalidBookTypeException("Invalid type of the file");
         }
-        String fileName = saveInExplorer(bookEpub, uniqueString);
+        String fileName = saveInExplorer(bookEpub, userId.toString());
         try (InputStream inputBook = bookEpub.getInputStream()) {
             ExtractBookInfo fullBook = extractEpubService.extractInfoFromEpub(inputBook);
             fullBook.setSize(bookEpub.getSize());
@@ -57,7 +57,7 @@ public class AttachmentServiceImpl implements AttachmentService{
             book.setReviews(0);
             book.getChapters().forEach(chapter -> chapter.setVector(vectorService.getVector(chapter.getContent())));
             elasticBookRepository.save(book);
-            notificationService.sendNotification(book.getChapters());
+            notificationService.sendNotification(book, userId);
             return bookId;
         } catch (IOException e) {
             throw new SaveFileException("Something went wrong while saving the book");

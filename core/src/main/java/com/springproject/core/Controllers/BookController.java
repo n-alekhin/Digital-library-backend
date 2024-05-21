@@ -102,9 +102,9 @@ public class BookController {
         if (bookEpub.isEmpty()) {
             throw new SaveFileException("File not found");
         }
-        String id = "0";
+        Long id = 0L;
         try {
-            id = authService.getAuthInfo().getId().toString();
+            id = authService.getAuthInfo().getId();
         } catch (ClassCastException ignore) {
         }
         return attachmentService.saveBookEpub(bookEpub, id);
