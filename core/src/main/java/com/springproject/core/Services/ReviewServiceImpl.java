@@ -102,4 +102,14 @@ public class ReviewServiceImpl implements ReviewService{
         reviewRepository.delete(review);
         return "ok";
     }
+
+    public boolean infReview(Long idBook, Long idUser) {
+        List<Review> byBook = bookRepository.findById(idBook).
+                orElseThrow(() -> new EntityNotFoundException("Book not found")).getReview();
+        List<Review> byUser = userRepository.findById(idUser).
+                orElseThrow(() -> new EntityNotFoundException("User not found")).getReview();
+        List<Review> intersection = new ArrayList<>(byBook);
+        intersection.retainAll(byUser);
+        return intersection.isEmpty();
+    }
 }

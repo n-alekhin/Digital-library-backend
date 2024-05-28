@@ -53,4 +53,12 @@ public class ReviewController {
     public String deleteReview(@PathVariable Long idReview) {
         return reviewService.deleteReview(idReview);
     }
+
+    @GetMapping("/getInf")
+    public boolean getInf(
+            @RequestParam("Book") Long idBook,
+            @RequestParam("User") Long idUser
+    ) {
+        return reviewService.infReview(idBook, idUser);
+    }
 }
