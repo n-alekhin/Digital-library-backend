@@ -4,6 +4,7 @@ import com.springproject.core.Repository.BookRepository;
 import com.springproject.core.Repository.ElasticBookRepository;
 import com.springproject.core.Repository.ReviewRepository;
 import com.springproject.core.Repository.UserRepository;
+import com.springproject.core.exceptions.ReviewNotFoundException;
 import com.springproject.core.model.Entity.Book;
 import com.springproject.core.model.Entity.Review;
 import com.springproject.core.model.Entity.User;
@@ -64,6 +65,7 @@ public class ReviewServiceImpl implements ReviewService{
         List<ReviewDtoOutput> reviewDtoOutputs = new ArrayList<>();
         for (Review review : reviews) {
             ReviewDtoOutput reviewDtoOutput = new ReviewDtoOutput();
+            reviewDtoOutput.id = review.getId();
             reviewDtoOutput.comment = review.getComment();
             reviewDtoOutput.grade = review.getGrade();
             reviewDtoOutput.idBook = review.getBook().getId();
@@ -93,5 +95,11 @@ public class ReviewServiceImpl implements ReviewService{
             }
             return sumGrade / book.getReview().size();
         }
+    }
+
+    public String deleteReview(Long idReview) {
+        Review review = reviewRepository.findById(idReview).orElseThrow(() -> new ReviewNotFoundException("Review not found"));
+        reviewRepository.delete(review);
+        return "ok";
     }
 }

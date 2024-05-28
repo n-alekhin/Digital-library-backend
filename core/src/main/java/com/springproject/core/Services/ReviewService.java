@@ -10,4 +10,5 @@ public interface ReviewService {
     List<ReviewDtoOutput> getReviewBook(Long idBook, int size, int page);
     List<ReviewDtoOutput> getReviewUser(Long idUser);
     Double getMeanGrade(Long idBook) throws Exception;
+    String deleteReview(Long id);
 }

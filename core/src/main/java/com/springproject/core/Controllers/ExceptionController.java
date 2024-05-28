@@ -27,7 +27,7 @@ public class ExceptionController {
         return new ErrorMessageDTO(exception.getMessage());
     }
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler({UsernameNotFoundException.class})
+    @ExceptionHandler({UsernameNotFoundException.class, ReviewNotFoundException.class})
     public ErrorMessageDTO handleNotFound(RuntimeException exception) {
         return new ErrorMessageDTO(exception.getMessage());
     }

@@ -48,4 +48,9 @@ public class ReviewController {
     ) throws Exception {
         return reviewService.getMeanGrade(idBook);
     }
+
+    @DeleteMapping("/{idReview}")
+    public String deleteReview(@PathVariable Long idReview) {
+        return reviewService.deleteReview(idReview);
+    }
 }
