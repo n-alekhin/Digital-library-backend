@@ -35,7 +35,13 @@ public class AutocompleteServiceImpl implements AutocompleteService{
                 .map(line -> Arrays.asList(line.split(",\\s*")))
                 .flatMap(List::stream)
                 .distinct()
-                .filter(name -> name.trim().toLowerCase().startsWith(lastAuthor.toLowerCase()))
+                .filter(name -> {
+                    String lowerCaseName = name.trim().toLowerCase();
+                    String lowerCaseLastAuthor = lastAuthor.toLowerCase();
+                    return lowerCaseName.startsWith(lowerCaseLastAuthor) || lowerCaseName.contains(" " + lowerCaseLastAuthor);
+                })
+                .sorted(Comparator.comparing((String name) -> !name.trim().toLowerCase().startsWith(lastAuthor.toLowerCase())))
                 .collect(Collectors.toList());
     }
+
 }
