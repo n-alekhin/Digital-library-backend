@@ -7,7 +7,7 @@ public interface UserService {
   void createUser(UserDto userDto, int role);
 
   Long banAdmin(Long userId);
-  Long ban(Long userId);
+  Long ban(Long userId, Long IdAdmin);
   Long grantAdminRights(Long userId);
   Long revokeAdminRights(Long userId);
   UserDtoResponse getUser(Long userId);

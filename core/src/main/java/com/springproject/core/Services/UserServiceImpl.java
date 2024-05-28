@@ -89,10 +89,16 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public Long ban(Long userId) {
+  public Long ban(Long userId, Long idAdmin) {
     User user = userRepository.findById(userId)
             .orElseThrow(() -> new EntityNotFoundException("User with ID " + userId + " not found"));
-    if (!Objects.equals(user.getRole(), Role.USER.getAuthority())) {
+    User admin = userRepository.findById(idAdmin)
+            .orElseThrow(() -> new EntityNotFoundException("User with ID " + idAdmin + " not found"));
+    if ( Objects.equals(user.getRole(), Role.SUPER_ADMIN.getAuthority() )) {
+      throw new AccessDeniedException("The user does not have permission to perform this action");
+    }
+    if ( Objects.equals(user.getRole(), Role.ADMIN.getAuthority() )
+    && !Objects.equals(admin.getRole(), Role.SUPER_ADMIN.getAuthority())) {
       throw new AccessDeniedException("The user does not have permission to perform this action");
     }
     user.setIsBanned(true);
