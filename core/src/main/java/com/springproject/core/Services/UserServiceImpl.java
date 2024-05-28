@@ -40,6 +40,9 @@ public class UserServiceImpl implements UserService {
     this.verificationTokenRepository = verificationTokenRepository;
     this.emailService = emailService;
   }
+  public void createTestUsers(UserDto userDto) {
+
+  }
 
   public void createUser(UserDto userDto, int role) {
     Optional<User> userInDB = userRepository.getByLogin(userDto.getLogin());
@@ -48,11 +51,6 @@ public class UserServiceImpl implements UserService {
     }
     if (userInDB.isPresent()) {
       userRepository.delete(userInDB.get());
-      /*user = userInDB.get();
-      long id = userInDB.get().getId();
-      mapper.map(userDto, user);
-      user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-      user.setId(id);*/
     }
     userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
     User user = mapper.map(userDto, User.class);

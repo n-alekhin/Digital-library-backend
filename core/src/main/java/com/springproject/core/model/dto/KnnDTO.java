@@ -15,4 +15,5 @@ public class KnnDTO {
     private Integer k = 20;
     private Float boost = 5f;
     private Integer numCandidates = 30;
+    private Boolean isConsiderPopularity = true;
 }

@@ -17,4 +17,5 @@ public class BoolSearch {
     private Map<String, String> should;
     @Schema(hidden = true)
     private Map<String, String> filter;
+    private Boolean isConsiderPopularity = true;
 }
