@@ -16,5 +16,6 @@ public class JwtResponse {
   private String refreshToken;
   private String role;
   private String login;
+  private String name;
   private Boolean isSendNotification;
 }

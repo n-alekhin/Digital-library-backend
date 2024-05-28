@@ -58,7 +58,7 @@ public class NotificationServiceImpl implements NotificationService {
         if (to.length > 0) {
             emailService.sendEmail(to,
                     "Book recommendation", "The book has been uploaded that may interest you!\n You can watch it here " +
-                            clientHost + "/book/" + elasticBook.getId());
+                            clientHost + "/foundbooks/" + elasticBook.getId());
         }
     }
 

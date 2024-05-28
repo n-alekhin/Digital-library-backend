@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
@@ -124,15 +125,23 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public List<BookDTO> searchBookBool(BoolSearch query) {
+        co.elastic.clients.elasticsearch._types.query_dsl.Query searchQuery;
+        if (query.getIsConsiderPopularity()) {
+            searchQuery = co.elastic.clients.elasticsearch._types.query_dsl.Query
+                    .of(q -> q
+                            .scriptScore(ssq -> ssq
+
+                                    .query(innerQ -> innerQ.bool(b -> buildBoolQuery(b, query)))
+                                    .script(s -> s.inline(inlineS -> inlineS.source("_score * (1 + 0.1 * (Math.log10(1 + doc['reviews'].value)))")))
+                            ));
+        } else {
+            searchQuery = co.elastic.clients.elasticsearch._types.query_dsl.Query
+                    .of(q -> q.bool(b -> buildBoolQuery(b, query)));
+        }
         Query queryForElastic = new NativeQueryBuilder()
                 .withPageable(PageRequest.of(0, 20))
                 .withStoredFields(Collections.singletonList("id"))
-                .withQuery(q -> q
-                        .scriptScore(ssq -> ssq
-
-                                .query(innerQ -> innerQ.bool(b -> buildBoolQuery(b, query)))
-                                .script(s -> s.inline(inlineS -> inlineS.source("_score * (1 + 0.1 * (Math.log10(1 + doc['reviews'].value)))")))
-                        )).build();
+                .withQuery(searchQuery).build();
         return searchBooks(queryForElastic);
     }
 
@@ -144,18 +153,27 @@ public class SearchServiceImpl implements SearchService {
         query.setNumCandidates(knnDTO.getNumCandidates());
         query.setQuery_vector(vectorService.getVector(knnDTO.getQuery()));
 
+        co.elastic.clients.elasticsearch._types.query_dsl.Query searchQuery;
+        if (knnDTO.getIsConsiderPopularity()) {
+            searchQuery = co.elastic.clients.elasticsearch._types.query_dsl.Query
+                    .of(q -> q
+                            .scriptScore(ssq -> ssq
+                                    .query(innerQ -> innerQ.matchAll(ma -> ma))
+                                    .script(s -> s.inline(inlineS ->
+                                                    inlineS.source("0.08 * (Math.log10(1 + doc['reviews'].value))")
+                                            )
+                                    )
+                            ));
+        } else {
+            searchQuery = co.elastic.clients.elasticsearch._types.query_dsl.Query
+                    .of(q -> q.matchNone(n -> n));
+        }
+
         Query queryForElastic = new NativeQueryBuilder()
                 .withSearchType(null)
                 .withPageable(PageRequest.of(0, 20))
                 .withStoredFields(Collections.singletonList("id"))
-                .withQuery(q -> q
-                        .scriptScore(ssq -> ssq
-                                .query(innerQ -> innerQ.matchAll(ma -> ma))
-                                .script(s -> s.inline(inlineS ->
-                                                inlineS.source("0.02 * (Math.log10(1 + doc['reviews'].value))")
-                                        )
-                                )
-                        ))
+                .withQuery(searchQuery)
                 .withKnnQuery(buildKnnQuery(query)).build();
 
         return searchBooks(queryForElastic);

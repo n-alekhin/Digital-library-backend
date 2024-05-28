@@ -31,6 +31,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
+  //192.168.137.169
   @Value("${application.security.allowed-origin}")
   private String allowedOrigin;
   private final UserDetailsService userDetailsService;
