@@ -66,7 +66,7 @@ public class AuthService {
         userRepository.save(user);
 
         return new JwtResponse(userDto.getId(), accessToken, refreshToken, user.getRole(),
-                user.getLogin(), user.getIsSendNotification());
+                user.getLogin(), user.getName(), user.getIsSendNotification());
     }
 
     public JwtResponse getAccessToken(@NonNull String refreshToken) {
@@ -81,10 +81,10 @@ public class AuthService {
                 final UserDto userDto = UserMapperImpl.toUserDto(optionalUser.get());
                 final String accessToken = jwtProvider.generateAccessToken(userDto);
                 return new JwtResponse(optionalUser.get().getId(), accessToken, null, optionalUser.get().getRole(),
-                        optionalUser.get().getLogin(), optionalUser.get().getIsSendNotification());
+                        optionalUser.get().getLogin(), optionalUser.get().getName(), optionalUser.get().getIsSendNotification());
             }
         }
-        return new JwtResponse(null, null, null, null, null, null);
+        return new JwtResponse(null, null, null, null, null, null, null);
     }
 
 
@@ -104,7 +104,7 @@ public class AuthService {
                 token.setRefreshToken(newRefreshToken);
                 userRepository.save(optionalUser.get());
                 return new JwtResponse(optionalUser.get().getId(), accessToken, newRefreshToken, optionalUser.get().getRole(),
-                        optionalUser.get().getLogin(), optionalUser.get().getIsSendNotification());
+                        optionalUser.get().getLogin(), optionalUser.get().getName(), optionalUser.get().getIsSendNotification());
             }
         }
         return null;
