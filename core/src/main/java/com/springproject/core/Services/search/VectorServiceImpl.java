@@ -1,12 +1,13 @@
 package com.springproject.core.Services.search;
 
-import com.springproject.core.dto.NounChunksDto;
+
 
 import java.util.List;
 import java.util.Objects;
 
 import com.springproject.core.model.data.Constants;
 import com.springproject.core.model.dto.InputData;
+import com.springproject.core.model.dto.NounChunksDto;
 import com.springproject.core.model.dto.RequestChunks;
 import com.springproject.core.model.dto.VectorDto;
 import lombok.RequiredArgsConstructor;
