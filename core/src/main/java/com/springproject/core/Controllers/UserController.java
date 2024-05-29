@@ -49,11 +49,11 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/banAdmin")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ResponseEntity<Long> banAdmin(@RequestParam Long userId) {
-        return ResponseEntity.ok(userService.banAdmin(userId));
-    }
+//    @PostMapping("/banAdmin")
+//    @PreAuthorize("hasRole('SUPER_ADMIN')")
+//    public ResponseEntity<Long> banAdmin(@RequestParam Long userId) {
+//        return ResponseEntity.ok(userService.banAdmin(userId));
+//    }
 
     @PostMapping("/ban")
     @PreAuthorize("hasRole('ADMIN')")

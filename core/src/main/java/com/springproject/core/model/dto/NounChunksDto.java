@@ -1,4 +1,4 @@
-package com.springproject.core.dto;
+package com.springproject.core.model.dto;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -6,6 +6,7 @@ import com.springproject.core.model.dto.ReviewDtoOutput;
 import com.springproject.core.model.dto.domain.JwtAuthentication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReviewController {
     private final ReviewService reviewService;
+
+
     @PostMapping("/create/{idBook}")
+    @PreAuthorize("hasRole('USER')")
     public Long create(
             @RequestBody ReviewDTO reviewDTO,
             @PathVariable Long idBook
@@ -50,6 +54,7 @@ public class ReviewController {
     }
 
     @DeleteMapping("/{idReview}")
+    @PreAuthorize("hasRole('ADMIN')")
     public String deleteReview(@PathVariable Long idReview) {
         return reviewService.deleteReview(idReview);
     }
