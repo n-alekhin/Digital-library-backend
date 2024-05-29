@@ -23,6 +23,8 @@ public class Book {
     private String fileName;
     private String title;
     private String authors;
+    private Long sumGrades;
+    private Integer countReviews;
 
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Review> review = new ArrayList<>();

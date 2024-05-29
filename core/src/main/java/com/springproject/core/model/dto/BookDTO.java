@@ -18,4 +18,6 @@ public class BookDTO {
     private String authors;
     @Schema(example = "http://localhost:8080/book/cover/1")
     private String coverImageUrl;
+    private Double averageGrade;
+    private Integer countReviews;
 }

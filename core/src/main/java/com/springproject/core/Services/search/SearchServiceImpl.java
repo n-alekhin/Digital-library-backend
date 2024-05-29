@@ -117,6 +117,7 @@ public class SearchServiceImpl implements SearchService {
     private List<BookDTO> getBooksByIds(List<Long> ids) {
         return bookRepository.findAllById(ids).stream().map(b -> {
                     BookDTO book = modelMapper.map(b, BookDTO.class);
+                    book.setAverageGrade(((double) b.getSumGrades()) / b.getCountReviews());
                     book.setCoverImageUrl(constants.getImagePath() + b.getId());
                     return book;
                 }).sorted(Comparator.comparingInt(book -> ids.indexOf(book.getId())))

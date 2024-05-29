@@ -69,6 +69,8 @@ public class AttachmentServiceImpl implements AttachmentService{
         bookDB.setTitle(fullBook.getTitle());
         bookDB.setAuthors(fullBook.getAuthors().stream().reduce((acc, s) -> acc.concat(", " + s)).orElse(null));
         bookDB.setFileName(fileName);
+        bookDB.setCountReviews(0);
+        bookDB.setSumGrades(0L);
         bookDB = bookRepository.save(bookDB);
 
         BookFullInfo bookFullInfo = bookFullInfoRepository.findById(bookDB.getId())

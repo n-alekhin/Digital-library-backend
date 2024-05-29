@@ -38,6 +38,8 @@ public class ReviewServiceImpl implements ReviewService{
         reviewRepository.save(review);
         book.getReview().add(review);
         user.getReview().add(review);
+        book.setSumGrades(book.getSumGrades() + reviewDTO.getGrade());
+        book.setCountReviews(book.getCountReviews() + 1);
         userRepository.save(user);
         bookRepository.save(book);
         ElasticBook elasticBook = elasticBookRepository.findById(idBook)
@@ -99,6 +101,9 @@ public class ReviewServiceImpl implements ReviewService{
 
     public String deleteReview(Long idReview) {
         Review review = reviewRepository.findById(idReview).orElseThrow(() -> new ReviewNotFoundException("Review not found"));
+        Book book = review.getBook();
+        book.setCountReviews(book.getCountReviews() - 1);
+        book.setSumGrades(book.getSumGrades() - review.getGrade());
         reviewRepository.delete(review);
         return "ok";
     }
