@@ -1,5 +1,6 @@
 package com.springproject.core.Services;
 
+import com.springproject.core.model.dto.ErrorMessageDTO;
 import com.springproject.core.model.dto.ReviewDTO;
 import com.springproject.core.model.dto.ReviewDtoOutput;
 
@@ -10,6 +11,7 @@ public interface ReviewService {
     List<ReviewDtoOutput> getReviewBook(Long idBook, int size, int page);
     List<ReviewDtoOutput> getReviewUser(Long idUser);
     Double getMeanGrade(Long idBook) throws Exception;
-    String deleteReview(Long id);
+    ErrorMessageDTO deleteReview(Long id);
     boolean infReview(Long idBook, Long idUser);
+    ErrorMessageDTO deleteAllByUser(Long idUser);
 }

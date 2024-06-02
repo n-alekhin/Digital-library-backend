@@ -26,7 +26,7 @@ public class Book {
     private Long sumGrades;
     private Integer countReviews;
 
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Review> review = new ArrayList<>();
 
     @Override

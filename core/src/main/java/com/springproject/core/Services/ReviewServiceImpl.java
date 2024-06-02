@@ -1,5 +1,6 @@
 package com.springproject.core.Services;
 
+import com.springproject.core.Controllers.ReviewController;
 import com.springproject.core.Repository.BookRepository;
 import com.springproject.core.Repository.ElasticBookRepository;
 import com.springproject.core.Repository.ReviewRepository;
@@ -9,6 +10,7 @@ import com.springproject.core.model.Entity.Book;
 import com.springproject.core.model.Entity.Review;
 import com.springproject.core.model.Entity.User;
 import com.springproject.core.model.data.Elastic.ElasticBook;
+import com.springproject.core.model.dto.ErrorMessageDTO;
 import com.springproject.core.model.dto.ReviewDTO;
 import com.springproject.core.model.dto.ReviewDtoOutput;
 import com.springproject.core.model.dto.ShortUserDTO;
@@ -99,13 +101,13 @@ public class ReviewServiceImpl implements ReviewService{
         }
     }
 
-    public String deleteReview(Long idReview) {
+    public ErrorMessageDTO deleteReview(Long idReview) {
         Review review = reviewRepository.findById(idReview).orElseThrow(() -> new ReviewNotFoundException("Review not found"));
         Book book = review.getBook();
         book.setCountReviews(book.getCountReviews() - 1);
         book.setSumGrades(book.getSumGrades() - review.getGrade());
         reviewRepository.delete(review);
-        return "ok";
+        return new ErrorMessageDTO("ok");
     }
 
     public boolean infReview(Long idBook, Long idUser) {
@@ -116,5 +118,20 @@ public class ReviewServiceImpl implements ReviewService{
         List<Review> intersection = new ArrayList<>(byBook);
         intersection.retainAll(byUser);
         return intersection.isEmpty();
+    }
+
+    public ErrorMessageDTO deleteAllByUser(Long idUser){
+        User user = userRepository.findById(idUser).
+                orElseThrow(() -> new EntityNotFoundException("User not found"));
+        List<Review> reviews = user.getReview();
+        for (Review review : reviews) {
+            Book book = review.getBook();
+            book.setCountReviews(book.getCountReviews() - 1);
+            book.setSumGrades(book.getSumGrades() - review.getGrade());
+            reviewRepository.delete(review);
+        }
+        user.getReview().clear();
+        userRepository.save(user);
+        return new ErrorMessageDTO("ok");
     }
 }

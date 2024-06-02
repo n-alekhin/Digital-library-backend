@@ -1,6 +1,8 @@
 package com.springproject.core.Controllers;
 
+import com.springproject.core.Repository.ReviewRepository;
 import com.springproject.core.Services.ReviewService;
+import com.springproject.core.model.dto.ErrorMessageDTO;
 import com.springproject.core.model.dto.ReviewDTO;
 import com.springproject.core.model.dto.ReviewDtoOutput;
 import com.springproject.core.model.dto.domain.JwtAuthentication;
@@ -18,6 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReviewController {
     private final ReviewService reviewService;
+    private final ReviewRepository reviewRepository;
 
 
     @PostMapping("/create/{idBook}")
@@ -53,9 +56,9 @@ public class ReviewController {
         return reviewService.getMeanGrade(idBook);
     }
 
-    @DeleteMapping("/{idReview}")
+    @DeleteMapping("/delete/{idReview}")
     @PreAuthorize("hasRole('ADMIN')")
-    public String deleteReview(@PathVariable Long idReview) {
+    public ErrorMessageDTO deleteReview(@PathVariable Long idReview) {
         return reviewService.deleteReview(idReview);
     }
 
@@ -66,4 +69,11 @@ public class ReviewController {
     ) {
         return reviewService.infReview(idBook, idUser);
     }
+
+    @DeleteMapping("/deleteAll/{idUser}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ErrorMessageDTO deleteAllReviewByUser(@PathVariable Long idUser) {
+        return reviewService.deleteAllByUser(idUser);
+    }
+
 }

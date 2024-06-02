@@ -39,7 +39,7 @@ public class User implements UserDetails {
   @PrimaryKeyJoinColumn
   private VerificationToken address;
 
-  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
   private List<Review> review = new ArrayList<>();
 
   private Boolean isBanned = false;
