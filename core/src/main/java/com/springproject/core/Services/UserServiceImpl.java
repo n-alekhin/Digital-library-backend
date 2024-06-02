@@ -28,17 +28,19 @@ public class UserServiceImpl implements UserService {
   private final JwtProvider jwtProvider;
   private final VerificationTokenRepository verificationTokenRepository;
   private final EmailService emailService;
+  private final  ReviewService reviewService;
   @Value("${application.client-host}")
   private String clientHost;
   @Value("${application.enable-verify}")
   private Boolean isVerify;
-  public UserServiceImpl(UserRepository userRepository, ModelMapper mapper, PasswordEncoder passwordEncoder, JwtProvider jwtProvider, VerificationTokenRepository verificationTokenRepository, EmailService emailService) {
+  public UserServiceImpl(UserRepository userRepository, ModelMapper mapper, PasswordEncoder passwordEncoder, JwtProvider jwtProvider, VerificationTokenRepository verificationTokenRepository, EmailService emailService, ReviewService reviewService) {
     this.userRepository = userRepository;
     this.mapper = mapper;
     this.passwordEncoder = passwordEncoder;
     this.jwtProvider = jwtProvider;
     this.verificationTokenRepository = verificationTokenRepository;
     this.emailService = emailService;
+      this.reviewService = reviewService;
   }
   public void createTestUsers(UserDto userDto) {
 
@@ -89,11 +91,13 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public Long ban(Long userId, Long idAdmin) {
+  public Long ban(Long userId, Long idAdmin, boolean ban) {
     User user = userRepository.findById(userId)
             .orElseThrow(() -> new EntityNotFoundException("User with ID " + userId + " not found"));
     User admin = userRepository.findById(idAdmin)
             .orElseThrow(() -> new EntityNotFoundException("User with ID " + idAdmin + " not found"));
+
+
     if ( Objects.equals(user.getRole(), Role.SUPER_ADMIN.getAuthority() )) {
       throw new AccessDeniedException("The user does not have permission to perform this action");
     }
@@ -102,6 +106,9 @@ public class UserServiceImpl implements UserService {
       throw new AccessDeniedException("The user does not have permission to perform this action");
     }
     user.setIsBanned(true);
+    if(ban) {
+      reviewService.deleteAllByUser(userId);
+    }
     return userRepository.save(user).getId();
   }
 

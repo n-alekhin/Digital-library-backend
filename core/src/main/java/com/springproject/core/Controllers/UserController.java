@@ -57,9 +57,9 @@ public class UserController {
 
     @PostMapping("/ban")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Long> ban(@RequestParam Long userId) {
+    public ResponseEntity<Long> ban(@RequestParam Long userId, @RequestParam boolean isPermanent) {
         Long idAdmin = ((JwtAuthentication) SecurityContextHolder.getContext().getAuthentication()).getId();
-        return ResponseEntity.ok(userService.ban(userId, idAdmin));
+        return ResponseEntity.ok(userService.ban(userId, idAdmin, isPermanent));
     }
 
     @PostMapping("/grantAdminRights")

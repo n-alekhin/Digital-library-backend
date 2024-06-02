@@ -47,6 +47,11 @@ public class AuthService {
             if (!user.getIsConfirmed())
                 throw new InvalidAuthException("Email is not confirmed");
         }
+
+        if(user.getIsBanned()){
+            throw new InvalidAuthException("user is banned");
+        }
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         authRequest.getLogin(),
