@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-@Document(indexName = "book2")
+@Document(indexName = "book")
 public class ElasticBook {
     @Id
     private Long id;

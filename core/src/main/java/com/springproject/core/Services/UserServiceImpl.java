@@ -79,7 +79,7 @@ public class UserServiceImpl implements UserService {
       emailService.sendEmail(new String[]{userDto.getLogin()}, "Verification",
               "Please verify your email " + clientHost + "/api/auth/verify?token="+token);
     }
-    System.out.println("Verification: " + token);
+    //System.out.println("Verification: " + token);
   }
 
   @Override

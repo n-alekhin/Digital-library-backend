@@ -116,11 +116,13 @@ public class AttachmentServiceImpl implements AttachmentService{
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         ExtractBookInfo fullBook = extractEpubService.extractInfoFromEpub(fileInputStreamForEpub);
         fullBook.setSize(size);
         Long bookId = saveInDB(fileName, fullBook);
         ElasticBook book = modelMapper.map(fullBook, ElasticBook.class);
         book.setId(bookId);
+        book.setReviews(0);
         book.getChapters().forEach(chapter -> chapter.setVector(vectorService.getVector(chapter.getContent())));
         elasticBookRepository.save(book);
     }

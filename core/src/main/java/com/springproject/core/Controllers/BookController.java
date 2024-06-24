@@ -1,6 +1,8 @@
 package com.springproject.core.Controllers;
 
+import com.springproject.core.Repository.BookRepository;
 import com.springproject.core.Services.attachment.AttachmentService;
+import com.springproject.core.model.Entity.Book;
 import com.springproject.core.model.Entity.BookFullInfo;
 import com.springproject.core.model.Entity.CoverImage;
 import com.springproject.core.Repository.BookFullInfoRepository;
@@ -43,6 +45,7 @@ public class BookController {
     private final AttachmentService attachmentService;
     private final SearchService searchService;
     private final BookFullInfoRepository bookFullInfoRepository;
+    private final BookRepository bookRepository;
     private final ModelMapper modelMapper;
     private final AuthService authService;
 
@@ -71,7 +74,10 @@ public class BookController {
     @GetMapping("/{bookId}")
     public DetailedBookDTO getDetailedBook(@PathVariable String bookId) {
         BookFullInfo bookFullInfo = bookFullInfoRepository.findById(Long.parseLong(bookId)).orElseThrow(() -> new BookNotFoundException("Book not found"));
+        Book bookReviews = bookRepository.findById(Long.parseLong(bookId)).orElseThrow(() -> new BookNotFoundException("Book not found"));
+
         DetailedBookDTO book = modelMapper.map(bookFullInfo, DetailedBookDTO.class);
+        book.setReviewsCount(bookReviews.getCountReviews());
         book.setCoverImageUrl(constants.getImagePath() + bookFullInfo.getBook().getId());
         book.setTitle(bookFullInfo.getBook().getTitle());
         book.setAuthors(bookFullInfo.getBook().getAuthors());

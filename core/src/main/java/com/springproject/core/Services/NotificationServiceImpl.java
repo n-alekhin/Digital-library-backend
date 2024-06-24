@@ -10,6 +10,7 @@ import com.springproject.core.model.data.Elastic.ElasticBook;
 import com.springproject.core.model.data.Elastic.ElasticPartChapter;
 import com.springproject.core.model.data.Elastic.search.KnnSearch;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.scheduling.annotation.Async;
@@ -19,6 +20,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
     private final SearchService searchService;
@@ -45,19 +47,21 @@ public class NotificationServiceImpl implements NotificationService {
                 }
             }
         });
-        scores.forEach(s -> System.out.println(s.getBookId() + " --- " + s.getScore() / elasticBook.getChapters().size()));
-        List<Long> ids = scores.stream().filter(s -> s.getScore() / elasticBook.getChapters().size() > 0.80).map(BookScore::getBookId).collect(Collectors.toList());
+        int size = elasticBook.getChapters().size();
+        scores.forEach(s -> log.info(s.getBookId() + ", scores: " + (s.getScore() / size)));
+        List<Long> ids = scores.stream().filter(s -> s.getScore() / size > 0.80).map(BookScore::getBookId).collect(Collectors.toList());
         List<Book> books = bookRepository.findAllById(ids);
+        books.forEach(b -> log.info(b.getId() + ", title: " + b.getTitle()));
         List<User> tmp = bookRepository.findUserLoginsByBooks(books);
-        tmp.forEach(u -> System.out.println(u.getLogin()));
         List<User> confirmedUsers = tmp.stream().filter(u -> u.getIsConfirmed() && !Objects.equals(u.getId(), providerId) &&
                 u.getIsSendNotification()).toList();
-        System.out.println("----------");
-        confirmedUsers.forEach(u -> System.out.println(u.getLogin()));
+        confirmedUsers.forEach(u -> log.info(u.getLogin()));
         String[] to = confirmedUsers.stream().map(User::getLogin).toList().toArray(new String[0]);
         if (to.length > 0) {
             emailService.sendEmail(to,
-                    "Book recommendation", "The book has been uploaded that may interest you!\n You can watch it here " +
+                    //"Book recommendation", "The book has been uploaded that may interest you!\n You can watch it here " +
+                    "Book recommendation",
+                    "Hello, dear user. We have a new recommendation for you! \nIf you have free time, you can view this book at the link " +
                             clientHost + "/foundbooks/" + elasticBook.getId());
         }
     }

@@ -1,8 +1,10 @@
 package com.springproject.core.Controllers;
 
 import com.springproject.core.Repository.BookFullInfoRepository;
+import com.springproject.core.Repository.BookRepository;
 import com.springproject.core.Services.attachment.AttachmentServiceImpl;
 import com.springproject.core.Services.search.SearchService;
+import com.springproject.core.model.Entity.Book;
 import com.springproject.core.model.Entity.BookFullInfo;
 import com.springproject.core.model.dto.BookDTO;
 import com.springproject.core.model.data.Elastic.ElasticBook;
@@ -35,6 +37,7 @@ public class UtilityController {
   private final ElasticsearchOperations operations;
   private final SearchService searchService;
   private final BookFullInfoRepository bookFullInfoRepository;
+  private final BookRepository bookRepository;
 
   @PreAuthorize("hasAuthority('USER')")
   @GetMapping("/hello")
@@ -80,6 +83,16 @@ public class UtilityController {
     BookFullInfo book = bookFullInfoRepository.findById(id).orElseThrow();
     book.setDescription(description.getDescription());
     bookFullInfoRepository.save(book);
+  }
+  @PostMapping("/change/{id}/title")
+  public void changeTitle(@PathVariable Long id, @RequestBody DetailedBookDTO description) {
+    Book book = bookRepository.findById(id).orElseThrow();
+    book.setTitle(description.getTitle());
+    bookRepository.save(book);
+  }
+  @GetMapping("/hi")
+  public String sayHi() {
+    return "Hi!";
   }
 
 }
